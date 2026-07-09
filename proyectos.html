@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyectos | Jhonsons González</title>
+    <meta name="description" content="Galería de proyectos de desarrollo web y videojuegos de Jhonsons González.">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="overflow-y: auto;">
+
+    <!-- NAV BAR -->
+    <header>
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                JHONSONS<span>G.</span>
+                <span class="logo-dot"></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#hero">Inicio</a></li>
+                <li><a href="index.html#galeria">Galería</a></li>
+                <li><a href="proyectos.html" class="active">Proyectos</a></li>
+                <li><a href="portafolio.html">Portafolio</a></li>
+                <li><a href="index.html#redes">Redes</a></li>
+                <li><a href="index.html#contactos">Contacto</a></li>
+            </ul>
+            <button class="burger" aria-label="Abrir menú">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </button>
+        </nav>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="subpage-container">
+        <header class="subpage-header">
+            <h1 class="subpage-title">Proyectos</h1>
+            <p class="subpage-subtitle">Explora mi catálogo de desarrollo de software, sitios web responsivos e integraciones de videojuegos de estética retro-futurista.</p>
+        </header>
+
+        <!-- Filter tabs -->
+        <ul class="filter-tabs">
+            <li><button class="filter-btn active" data-filter="all">Todos</button></li>
+            <li><button class="filter-btn" data-filter="web">Desarrollo Web</button></li>
+            <li><button class="filter-btn" data-filter="game">Videojuegos</button></li>
+        </ul>
+
+        <!-- Projects grid -->
+        <div class="projects-grid">
+            <!-- Project 1 -->
+            <article class="project-card" data-category="web">
+                <div class="project-thumbnail">
+                    <img src="assets/project_thumbnail_1.png" alt="Aether Console UI">
+                </div>
+                <div class="project-details">
+                    <div class="project-meta">
+                        <span class="project-badge badge-web">Desarrollo Web</span>
+                        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2026</span>
+                    </div>
+                    <h2 class="project-title">Aether Control Panel</h2>
+                    <p class="project-description">Una consola web interactiva diseñada para la monitorización de sistemas virtuales con micro-animaciones SVG, estilo steampunk limpio y rendimiento optimizado en tiempo real.</p>
+                    <div class="project-links">
+                        <a href="https://github.com" target="_blank" class="project-link highlight-green">
+                            <i class="fa-brands fa-github"></i> Código
+                        </a>
+                        <a href="#" class="project-link highlight-orange">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Demo En Vivo
+                        </a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Project 2 -->
+            <article class="project-card" data-category="game">
+                <div class="project-thumbnail">
+                    <img src="assets/project_thumbnail_2.png" alt="Steampunk Odyssey Game">
+                </div>
+                <div class="project-details">
+                    <div class="project-meta">
+                        <span class="project-badge badge-game">Videojuegos</span>
+                        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2025</span>
+                    </div>
+                    <h2 class="project-title">Aetherian Odyssey</h2>
+                    <p class="project-description">Plataformas de acción 2D desarrollado de forma empírica en Godot. Con mecánicas de resolución de puzzles de engranajes y física de presión de vapor en estética pixel art.</p>
+                    <div class="project-links">
+                        <a href="https://github.com" target="_blank" class="project-link highlight-green">
+                            <i class="fa-brands fa-github"></i> Repositorio
+                        </a>
+                        <a href="#" class="project-link highlight-purple">
+                            <i class="fa-solid fa-play"></i> Jugar (Itch.io)
+                        </a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer style="margin-top: 5rem;">
+        <p>&copy; 2026 Jhonsons González. Todos los derechos reservados. Diseñado & programado con <span class="highlight-orange">Pasión</span>.</p>
+    </footer>
+
+    <!-- Main JavaScript -->
+    <script src="js/main.js"></script>
+</body>
+</html>
