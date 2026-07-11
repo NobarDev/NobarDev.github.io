@@ -13,6 +13,11 @@
     --accent-green: #7cfc00;
     --accent-orange: #ff6b00;
     --accent-purple: #b100ff;
+    --accent-tiktok: #fe2c55;
+    --accent-instagram: #c13584;
+    --accent-twitch: #6441a5;
+    --accent-behance: #0057ff;
+    --accent-facebook: #1877f2;
 
     --text-white: #f5f5f7;
     --text-muted: #8e8e93;
@@ -157,15 +162,15 @@ img {
 /* ==========================================================================
    HEADER & NAVBAR
    ========================================================================== */
-header {
+body > header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
-    background: rgba(5, 5, 5, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(8, 8, 10, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -477,48 +482,48 @@ header {
 
 /* Unique hover styles for networks */
 .social-card.tiktok:hover {
-    border-color: var(--accent-orange);
+    border-color: var(--accent-tiktok);
 }
 
 .social-card.tiktok:hover .social-icon {
     background: rgba(255, 107, 0, 0.1);
-    color: var(--accent-orange);
+    color: var(--accent-tiktok);
 }
 
 .social-card.instagram:hover {
-    border-color: var(--accent-purple);
+    border-color: var(--accent-instagram);
 }
 
 .social-card.instagram:hover .social-icon {
     background: rgba(177, 0, 255, 0.1);
-    color: var(--accent-purple);
+    color: var(--accent-instagram);
 }
 
 .social-card.twitch:hover {
-    border-color: var(--accent-purple);
+    border-color: var(--accent-twitch);
 }
 
 .social-card.twitch:hover .social-icon {
     background: rgba(177, 0, 255, 0.1);
-    color: var(--accent-purple);
+    color: var(--accent-twitch);
 }
 
 .social-card.behance:hover {
-    border-color: var(--accent-green);
+    border-color: var(--accent-behance);
 }
 
 .social-card.behance:hover .social-icon {
     background: rgba(124, 252, 0, 0.1);
-    color: var(--accent-green);
+    color: var(--accent-behance);
 }
 
 .social-card.facebook:hover {
-    border-color: var(--accent-orange);
+    border-color: var(--accent-facebook);
 }
 
 .social-card.facebook:hover .social-icon {
     background: rgba(255, 107, 0, 0.1);
-    color: var(--accent-orange);
+    color: var(--accent-facebook);
 }
 
 .social-name {
@@ -687,7 +692,7 @@ header {
 
 .subpage-header {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 2.5rem;
 }
 
 .subpage-title {
@@ -702,6 +707,7 @@ header {
     font-size: 1.1rem;
     max-width: 600px;
     margin: 0 auto;
+    margin-bottom: 2rem;
 }
 
 /* Filters UI */
@@ -733,11 +739,11 @@ header {
     background: rgba(255, 107, 0, 0.05);
 }
 
-/* Proyectos Page Grid */
+/* Proyectos Page Grid — 4 columnas, tarjetas verticales */
 .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: 2.5rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
 }
 
 .project-card {
@@ -746,17 +752,20 @@ header {
     border-radius: 16px;
     overflow: hidden;
     transition: var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
 }
 
 .project-card:hover {
-    transform: translateY(-8px);
     border-color: var(--accent-purple);
-    box-shadow: 0 10px 30px rgba(177, 0, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(177, 0, 255, 0.15);
+    transform: translateY(-6px);
 }
 
 .project-thumbnail {
-    height: 240px;
+    height: 180px;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .project-thumbnail img {
@@ -767,17 +776,21 @@ header {
 }
 
 .project-card:hover .project-thumbnail img {
-    transform: scale(1.03);
+    transform: scale(1.05);
 }
 
 .project-details {
-    padding: 2rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 .project-meta {
     display: flex;
     gap: 0.75rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
+    align-items: center;
 }
 
 .project-badge {
@@ -792,16 +805,24 @@ header {
 .badge-web {
     background: rgba(124, 252, 0, 0.1);
     color: var(--accent-green);
+    border: 1px solid rgba(124, 252, 0, 0.25);
 }
 
 .badge-game {
     background: rgba(255, 107, 0, 0.1);
     color: var(--accent-orange);
+    border: 1px solid rgba(255, 107, 0, 0.25);
+}
+
+.badge-design {
+    background: rgba(177, 0, 255, 0.1);
+    color: var(--accent-purple);
+    border: 1px solid rgba(177, 0, 255, 0.25);
 }
 
 .project-title {
-    font-size: 1.5rem;
-    margin-bottom: 0.75rem;
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
 }
 
 .project-description {
@@ -823,32 +844,43 @@ header {
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    transition: var(--transition-fast);
 }
 
-/* Portafolio Page Grid (Behance style) */
+.project-link.highlight-green { color: var(--accent-green); }
+.project-link.highlight-orange { color: var(--accent-orange); }
+.project-link.highlight-purple { color: var(--accent-purple); }
+.project-link:hover { opacity: 0.75; }
+
+/* Portafolio Page Grid — Horizontal (3 columnas) */
 .behance-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 4rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    align-items: start;
 }
 
 .behance-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 20px;
+    border-radius: 16px;
     overflow: hidden;
     transition: var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
 }
 
 .behance-card:hover {
     border-color: var(--accent-green);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 12px 32px rgba(124, 252, 0, 0.1);
+    transform: translateY(-6px);
 }
 
 .behance-media {
     width: 100%;
-    max-height: 600px;
+    height: 260px;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .behance-media img {
@@ -859,57 +891,64 @@ header {
 }
 
 .behance-card:hover .behance-media img {
-    transform: scale(1.02);
+    transform: scale(1.05);
 }
 
 .behance-info {
-    padding: 3rem;
+    padding: 1.5rem;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2rem;
+    flex-direction: column;
+    gap: 1rem;
     border-top: 1px solid var(--border-color);
+    flex: 1;
 }
 
 .behance-meta {
-    max-width: 70%;
+    max-width: 100%;
 }
 
 .behance-tags {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
     flex-wrap: wrap;
 }
 
 .behance-tag {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--text-muted);
     background: rgba(255, 255, 255, 0.05);
-    padding: 0.25rem 0.75rem;
+    padding: 0.2rem 0.6rem;
     border-radius: 4px;
 }
 
 .behance-title {
-    font-size: 2rem;
-    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
 }
 
 .behance-description {
     color: var(--text-muted);
     line-height: 1.6;
+    font-size: 0.9rem;
 }
 
 .behance-btn {
+    display: inline-block;
     border: 1px solid var(--accent-green);
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1.25rem;
     border-radius: 8px;
     color: var(--accent-green);
     font-family: var(--font-mono);
+    font-size: 0.8rem;
     text-transform: uppercase;
     font-weight: 700;
     transition: var(--transition-smooth);
+    text-align: center;
+    align-self: flex-start;
+    margin-top: auto;
 }
 
 .behance-btn:hover {
@@ -997,8 +1036,30 @@ footer {
         padding: 2rem;
     }
 
+    .behance-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .behance-info {
+        flex-direction: column;
+        padding: 1.25rem;
+    }
+
     .behance-meta {
         max-width: 100%;
+    }
+
+    /* Project cards: 2 columnas en tablet */
+    .projects-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .project-thumbnail {
+        height: 160px;
+    }
+
+    .project-details {
+        padding: 1.25rem;
     }
 
     .gallery-showcase {
@@ -1015,6 +1076,10 @@ footer {
 
     .gallery-item .gallery-desc {
         display: none;
+    }
+
+    .behance-grid {
+        grid-template-columns: 1fr;
     }
 }
 
