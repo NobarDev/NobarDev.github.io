@@ -986,6 +986,23 @@ footer {
    RESPONSIVE MEDIA QUERIES
    ========================================================================== */
 @media (max-width: 900px) {
+    /* Mobile natural scroll overrides */
+    body {
+        overflow-y: auto;
+    }
+
+    .snap-container {
+        height: auto;
+        overflow-y: visible;
+    }
+
+    .snap-section {
+        height: auto;
+        min-height: 100vh;
+        padding: 90px 1.5rem 3rem;
+        overflow: visible;
+    }
+
     .nav-links {
         display: none;
     }
@@ -1065,6 +1082,14 @@ footer {
     .gallery-showcase {
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
+    }
+
+    #contactos {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+        padding-top: 90px;
+        padding-bottom: 0;
     }
 }
 
