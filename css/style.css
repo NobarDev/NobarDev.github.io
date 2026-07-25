@@ -1167,3 +1167,323 @@ footer {
         transform: translateY(0);
     }
 }
+
+/* ==========================================================================
+   CUSTOM PDF & MEDIA LIGHTBOX VIEWER
+   ========================================================================== */
+.pdf-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    background: rgba(5, 5, 8, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 1.5rem;
+}
+
+.pdf-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.pdf-modal-wrapper {
+    display: flex;
+    width: 100%;
+    max-width: 1280px;
+    height: 88vh;
+    gap: 1.25rem;
+    align-items: stretch;
+    position: relative;
+}
+
+/* Central Viewport Container */
+.pdf-viewport-container {
+    flex: 1;
+    height: 100%;
+    background: rgba(12, 13, 18, 0.95);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Left-side scrollbar layout */
+.pdf-scroll-area {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: auto;
+    direction: rtl; /* Places scrollbar on the left side */
+    padding: 2rem 1.5rem;
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for left side */
+.pdf-scroll-area::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.pdf-scroll-area::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+}
+
+.pdf-scroll-area::-webkit-scrollbar-thumb {
+    background: var(--accent-green);
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+}
+
+.pdf-canvas-wrapper {
+    direction: ltr; /* Restores text/canvas orientation */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    width: 100%;
+    min-height: 100%;
+    transform-origin: center center;
+    transition: transform 0.15s ease-out;
+}
+
+.pdf-canvas-wrapper canvas,
+.pdf-canvas-wrapper img {
+    max-width: 92%;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #ffffff;
+}
+
+.pdf-scroll-area.zoomed-mode {
+    cursor: grab !important;
+    user-select: none;
+}
+
+.pdf-scroll-area.zoomed-mode.grabbing {
+    cursor: grabbing !important;
+}
+
+/* Right Toolbar Panel */
+.pdf-toolbar-panel {
+    width: 72px;
+    height: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 0.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    position: relative;
+}
+
+.pdf-toolbar-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+}
+
+.pdf-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    color: var(--text-white);
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    position: relative;
+}
+
+.pdf-btn:hover:not(:disabled) {
+    background: rgba(0, 255, 136, 0.15);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.25);
+}
+
+.pdf-btn.active {
+    background: var(--accent-green);
+    color: var(--bg-black);
+    border-color: var(--accent-green);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+}
+
+.pdf-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none !important;
+    background: rgba(255, 255, 255, 0.02);
+    border-color: transparent;
+    color: var(--text-muted);
+}
+
+.pdf-page-num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 0.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    width: 100%;
+}
+
+/* Zoom Popover Slider */
+.pdf-zoom-popover {
+    position: absolute;
+    right: 84px;
+    top: 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(12px);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 200px;
+    z-index: 25;
+}
+
+.pdf-zoom-popover.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.pdf-zoom-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.pdf-zoom-val {
+    color: var(--accent-green);
+    font-family: var(--font-mono);
+}
+
+.pdf-zoom-slider {
+    width: 100%;
+    accent-color: var(--accent-green);
+    cursor: pointer;
+}
+
+/* Share Popover Menu */
+.pdf-share-popover {
+    position: absolute;
+    right: 84px;
+    bottom: 5.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 0.85rem;
+    display: flex;
+    gap: 0.6rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(12px);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 25;
+}
+
+.pdf-share-popover.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.pdf-share-item {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.pdf-share-item.wa { background: #25D366; }
+.pdf-share-item.tw { background: #000000; border: 1px solid #333; }
+.pdf-share-item.fb { background: #1877F2; }
+.pdf-share-item.ig { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+
+.pdf-share-item:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+    .pdf-modal-wrapper {
+        flex-direction: column-reverse;
+        height: 94vh;
+        gap: 0.75rem;
+    }
+    
+    .pdf-toolbar-panel {
+        width: 100%;
+        height: 60px;
+        flex-direction: row;
+        padding: 0.5rem 1rem;
+    }
+
+    .pdf-toolbar-group {
+        flex-direction: row;
+    }
+
+    .pdf-zoom-popover {
+        right: auto;
+        left: 1rem;
+        top: -120px;
+        transform: translateY(10px);
+    }
+    
+    .pdf-zoom-popover.active {
+        transform: translateY(0);
+    }
+
+    .pdf-share-popover {
+        right: 1rem;
+        bottom: 70px;
+        transform: translateY(10px);
+    }
+
+    .pdf-share-popover.active {
+        transform: translateY(0);
+    }
+}

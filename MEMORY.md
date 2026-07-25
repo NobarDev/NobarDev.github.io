@@ -83,6 +83,17 @@ Portafolio/
    - Simulación de envío con cambio de estado en botón (`ENVIANDO...` ➔ `¡MENSAJE ENVIADO!`).
    - Botón directo de WhatsApp para contacto inmediato.
 
+5. **Visor de PDF e Imágenes Interactivo (Lightbox) (`js/main.js` & `css/style.css`):**
+   - Modal con fondo negro translúcido (`rgba(5, 5, 8, 0.88)` + backdrop blur).
+   - Renderizado dinámico de archivos PDF en canvas mediante PDF.js y scroll continuo vertical con scrollbar al **lado izquierdo**.
+   - Barra de herramientas derecha: Zoom deslizante (100%-300%), modo manito de arrastre (`grab`/`grabbing`), navegación de páginas (que se deshabilita al hacer zoom), y menú de redes sociales (WhatsApp, X, Facebook, Instagram).
+   - Reemplazo de etiquetas de botones a `"Ver"`.
+
+6. **Gestor Privado de Carga de Archivos (`gestor-privado.html`):**
+   - Página privada no enlazada en navegación y protegida con `<meta name="robots" content="noindex, nofollow">`.
+   - Área Drag & Drop para subir PDFs e imágenes.
+   - Vista previa en tiempo real y generador automático de código HTML para copiar con 1 clic.
+
 ---
 
 ## 📑 5. Progreso Actual y Estado de Secciones
@@ -93,18 +104,21 @@ Portafolio/
 | **Obras Destacadas (`#galeria`)** | 100% | Grid de 4 artículos destacados con enlaces a Portafolio/Proyectos. |
 | **Redes / Transmisión (`#redes`)** | 100% | Tarjetas de TikTok, Instagram, Twitch, Behance y Facebook. |
 | **Contacto (`#contactos`)** | 100% | Formulario estilizado y botón directo a WhatsApp. |
-| **Galería de Arte (`portafolio.html`)** | 100% | Vista estilo Behance con tags, descripciones y enlace de expansión. |
+| **Galería de Arte (`portafolio.html`)** | 100% | Vista estilo Behance con tags, descripciones, visor PDF interactivo y botones "Ver". |
 | **Galería de Proyectos (`proyectos.html`)** | 100% | Grid de proyectos de Software y Videojuegos con filtrado interactivo. |
+| **Gestor Privado (`gestor-privado.html`)** | 100% | Panel privado para subir PDFs/imágenes y generar tarjetas HTML sin indexación de Google. |
 
 ---
 
 ## 🚀 6. Próximos Pasos Recomendados (Roadmap)
 
-- [ ] **Modal / Lightbox para Portafolio:** Implementar una vista emergente para ampliar las imágenes de ilustración a alta resolución al hacer clic en "Expandir Arte".
+- [x] **Visor / Lightbox PDF e Imágenes:** Implementado con zoom, manito de arrastre, desplazamiento a la izquierda y menú compartir.
+- [x] **Gestor Privado de Contenidos:** Creado con protección noindex de buscadores y generador de tarjetas.
 - [ ] **Integración Real del Formulario:** Conectar el formulario de contacto con un servicio backend como Formspree o EmailJS para recibir correos reales.
-- [ ] **Añadir más Proyectos/Obras:** Expandir el catálogo visual con nuevos proyectos desarrollados en Godot o páginas web adicionales.
+- [ ] **Añadir más Proyectos/Obras:** Expandir el catálogo visual con nuevos proyectos desarrollados en Godot o documentos PDF reales.
 - [ ] **Despliegue a GitHub Pages:** Publicar los cambios en `https://nobardev.github.io/`.
 
 ---
 
-*Archivo de memoria generado para garantizar continuidad sin pérdida de contexto.*
+*Archivo de memoria actualizado para garantizar continuidad sin pérdida de contexto.*
+
