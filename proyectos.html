@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body style="overflow-y: auto;">
 
     <!-- NAV BAR -->
@@ -36,7 +38,8 @@
     <main class="subpage-container">
         <header class="subpage-header">
             <h1 class="subpage-title">Proyectos</h1>
-            <p class="subpage-subtitle">Explora mi catálogo de desarrollo de software, sitios web responsivos e integraciones de videojuegos de estética retro-futurista.</p>
+            <p class="subpage-subtitle">Explora mi catálogo de desarrollo de software, sitios web responsivos e
+                integraciones de videojuegos de estética retro-futurista.</p>
         </header>
 
         <!-- Filter tabs -->
@@ -56,10 +59,13 @@
                 <div class="project-details">
                     <div class="project-meta">
                         <span class="project-badge badge-web">Desarrollo Web</span>
-                        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2026</span>
+                        <span
+                            style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2026</span>
                     </div>
                     <h2 class="project-title">Aether Control Panel</h2>
-                    <p class="project-description">Una consola web interactiva diseñada para la monitorización de sistemas virtuales con micro-animaciones SVG, estilo steampunk limpio y rendimiento optimizado en tiempo real.</p>
+                    <p class="project-description">Una consola web interactiva diseñada para la monitorización de
+                        sistemas virtuales con micro-animaciones SVG, estilo steampunk limpio y rendimiento optimizado
+                        en tiempo real.</p>
                     <div class="project-links">
                         <a href="https://github.com" target="_blank" class="project-link highlight-green">
                             <i class="fa-brands fa-github"></i> Código
@@ -79,10 +85,13 @@
                 <div class="project-details">
                     <div class="project-meta">
                         <span class="project-badge badge-game">Videojuegos</span>
-                        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2025</span>
+                        <span
+                            style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2025</span>
                     </div>
                     <h2 class="project-title">Aetherian Odyssey</h2>
-                    <p class="project-description">Plataformas de acción 2D desarrollado de forma empírica en Godot. Con mecánicas de resolución de puzzles de engranajes y física de presión de vapor en estética pixel art.</p>
+                    <p class="project-description">Plataformas de acción 2D desarrollado de forma empírica en Godot. Con
+                        mecánicas de resolución de puzzles de engranajes y física de presión de vapor en estética pixel
+                        art.</p>
                     <div class="project-links">
                         <a href="https://github.com" target="_blank" class="project-link highlight-green">
                             <i class="fa-brands fa-github"></i> Repositorio
@@ -102,10 +111,13 @@
                 <div class="project-details">
                     <div class="project-meta">
                         <span class="project-badge badge-web">Desarrollo Web</span>
-                        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2025</span>
+                        <span
+                            style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2025</span>
                     </div>
                     <h2 class="project-title">SteamCore Dashboard</h2>
-                    <p class="project-description">Aplicación web de visualización de datos industriales con gráficos animados en tiempo real, construida con D3.js y una interfaz steampunk de alta fidelidad para monitoreo de procesos.</p>
+                    <p class="project-description">Aplicación web de visualización de datos industriales con gráficos
+                        animados en tiempo real, construida con D3.js y una interfaz steampunk de alta fidelidad para
+                        monitoreo de procesos.</p>
                     <div class="project-links">
                         <a href="https://github.com" target="_blank" class="project-link highlight-green">
                             <i class="fa-brands fa-github"></i> Código
@@ -125,10 +137,13 @@
                 <div class="project-details">
                     <div class="project-meta">
                         <span class="project-badge badge-game">Videojuegos</span>
-                        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2024</span>
+                        <span
+                            style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2024</span>
                     </div>
                     <h2 class="project-title">Chronos Gears</h2>
-                    <p class="project-description">Prototipo de puzzle mecánico 2D donde el jugador manipula engranajes y palancas para recomponer el tiempo. Desarrollado en Godot con física personalizada y arte pixel steampunk.</p>
+                    <p class="project-description">Prototipo de puzzle mecánico 2D donde el jugador manipula engranajes
+                        y palancas para recomponer el tiempo. Desarrollado en Godot con física personalizada y arte
+                        pixel steampunk.</p>
                     <div class="project-links">
                         <a href="https://github.com" target="_blank" class="project-link highlight-green">
                             <i class="fa-brands fa-github"></i> Repositorio
@@ -144,7 +159,8 @@
 
     <!-- FOOTER -->
     <footer style="margin-top: 5rem;">
-        <p>&copy; 2026 Jhonsons González. Todos los derechos reservados. Diseñado & programado con <span class="highlight-orange">Pasión</span>.</p>
+        <p>&copy; 2026 Jhonsons González. Todos los derechos reservados. Diseñado & programado con <span
+                class="highlight-orange">Pasión</span>.</p>
     </footer>
 
     <!-- PDF.js Library for PDF Rendering -->
@@ -160,22 +176,26 @@
 
             const cards = JSON.parse(localStorage.getItem('published_cards_proyectos') || '[]');
             cards.forEach(async (card) => {
-                const tagsHTML = card.tags.map(t => `<span class="project-tag">${t}</span>`).join('');
+                if (!card) return;
+                const tagsArr = Array.isArray(card.tags) ? card.tags : [];
+                const tagsHTML = tagsArr.map(t => `<span class="project-badge badge-web">${t}</span>`).join('');
                 const dataType = card.isPdf ? ' data-type="pdf"' : '';
-                
-                let finalThumbSrc = card.thumbnailSrc;
-                let finalFileSrc = card.fileSrc;
 
-                const cardId = card.id;
+                let finalThumbSrc = card.thumbnailSrc || 'assets/art_piece_1.png';
+                let finalFileSrc = card.fileSrc || '#';
+
+                const cardId = card.id || Date.now().toString();
                 const articleHTML = `
                 <article class="project-card" data-category="all" data-card-id="${cardId}" style="animation: fadeIn 0.4s ease forwards;">
-                    <div class="project-img-container">
+                    <div class="project-thumbnail">
                         <img src="${finalThumbSrc}" alt="${card.title}" id="img-${cardId}">
                     </div>
-                    <div class="project-info">
-                        <div class="project-tags">${tagsHTML}</div>
+                    <div class="project-details">
+                        <div class="project-meta">
+                            ${tagsHTML}
+                        </div>
                         <h2 class="project-title">${card.title}</h2>
-                        <p class="project-desc">${card.description}</p>
+                        <p class="project-description">${card.description}</p>
                         <div class="project-links">
                             <a href="${finalFileSrc}" class="project-link highlight-green view-media-btn" id="btn-${cardId}" data-title="${card.title}"${dataType}>
                                 <i class="fa-solid fa-eye"></i> Ver
@@ -214,5 +234,5 @@
         });
     </script>
 </body>
-</html>
 
+</html>

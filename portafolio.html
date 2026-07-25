@@ -118,14 +118,16 @@
 
             const cards = JSON.parse(localStorage.getItem('published_cards_portafolio') || '[]');
             cards.forEach(async (card) => {
-                const tagsHTML = card.tags.map(t => `<span class="behance-tag">${t}</span>`).join('');
+                if (!card) return;
+                const tagsArr = Array.isArray(card.tags) ? card.tags : [];
+                const tagsHTML = tagsArr.map(t => `<span class="behance-tag">${t}</span>`).join('');
                 const dataType = card.isPdf ? ' data-type="pdf"' : '';
                 
                 // Fallbacks to standard relative path
-                let finalThumbSrc = card.thumbnailSrc;
-                let finalFileSrc = card.fileSrc;
+                let finalThumbSrc = card.thumbnailSrc || 'assets/art_piece_1.png';
+                let finalFileSrc = card.fileSrc || '#';
 
-                const cardId = card.id;
+                const cardId = card.id || Date.now().toString();
                 const articleHTML = `
                 <article class="behance-card" data-card-id="${cardId}" style="animation: fadeIn 0.4s ease forwards;">
                     <div class="behance-media">

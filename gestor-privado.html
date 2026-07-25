@@ -593,8 +593,12 @@
                     </div>
 
                     <div class="form-group-admin">
-                        <label for="itemDesc">Descripción de la Obra</label>
-                        <textarea id="itemDesc" class="form-input-admin" rows="3"
+                        <label for="itemDesc" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>Descripción de la Obra</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">Máx. 150
+                                caracteres para mantener el tamaño</span>
+                        </label>
+                        <textarea id="itemDesc" class="form-input-admin" rows="3" maxlength="150"
                             placeholder="Describe brevemente el concepto visual o técnico..." required></textarea>
                     </div>
 
@@ -735,7 +739,7 @@
                 e.preventDefault();
                 dropzone.classList.remove('dragover');
                 if (e.dataTransfer.files.length > 0) {
-                    fileInput.files = e.dataTransfer.files;
+                    try { fileInput.files = e.dataTransfer.files; } catch (err) { }
                     handleFileSelect(e.dataTransfer.files[0]);
                 }
             });
@@ -746,7 +750,10 @@
                 }
             });
 
+            let globalMainFile = null;
+
             function handleFileSelect(file) {
+                globalMainFile = file;
                 dropzoneText.textContent = `Archivo seleccionado: ${file.name}`;
                 isPdfFile = file.name.toLowerCase().endsWith('.pdf');
 
@@ -844,7 +851,7 @@ ${tagsHTML}
                 e.preventDefault();
                 const title = itemTitle.value.trim();
                 const category = itemCategory.value;
-                const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : 'archivo_ejemplo';
+                const fileName = globalMainFile ? globalMainFile.name : 'archivo_ejemplo';
 
                 const newHistoryItem = {
                     title,
@@ -877,7 +884,7 @@ ${tagsHTML}
                         return;
                     }
 
-                    if (fileInput.files.length === 0 && currentFileUrl.includes('art_piece_1')) {
+                    if (!globalMainFile && currentFileUrl.includes('art_piece_1')) {
                         alert('Por favor selecciona o arrastra un archivo (PDF o Imagen) antes de publicar.');
                         return;
                     }
@@ -889,10 +896,14 @@ ${tagsHTML}
                     let thumbnailDbId = '';
 
                     try {
-                        if (fileInput.files.length > 0) {
-                            const mainFileObj = fileInput.files[0];
+                        if (globalMainFile) {
                             fileDbId = `file_${cardId}`;
-                            await window.FileStore.saveFile(fileDbId, mainFileObj, mainFileObj.name);
+                            await window.FileStore.saveFile(fileDbId, globalMainFile, globalMainFile.name);
+
+                            // Si es una imagen y no hay miniatura personalizada, usar el archivo principal como miniatura
+                            if (!thumbnailInput.files.length && !isPdfFile) {
+                                thumbnailDbId = fileDbId;
+                            }
                         }
 
                         if (thumbnailInput.files.length > 0) {
@@ -906,7 +917,7 @@ ${tagsHTML}
                         return;
                     }
 
-                    const mainFile = fileInput.files.length > 0 ? fileInput.files[0].name : '';
+                    const mainFile = globalMainFile ? globalMainFile.name : '';
                     const thumbFile = thumbnailFileName || mainFile;
                     const isPdf = mainFile.toLowerCase().endsWith('.pdf');
 
