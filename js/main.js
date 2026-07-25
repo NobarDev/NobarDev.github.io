@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let scrollLeftStart = 0, scrollTopStart = 0;
 
     // Open Viewer Function
-    async function openMediaViewer(url, title = 'Arte / Documento') {
+    async function openMediaViewer(url, title = 'Arte / Documento', fileType = '') {
         ensureLightboxDOM();
         mediaUrl = url;
         mediaTitle = title;
@@ -303,8 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
         lightbox.classList.add('active');
         document.body.style.overflow = 'hidden';
 
-        // Check if PDF or Image
-        const isPdf = url.toLowerCase().endsWith('.pdf') || url.includes('data:application/pdf');
+        // Check if PDF or Image — supports blob: URLs via data-type hint
+        const isPdf = fileType === 'pdf' || url.toLowerCase().endsWith('.pdf') || url.includes('data:application/pdf');
 
         if (isPdf && window.pdfjsLib) {
             try {
@@ -423,8 +423,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const src = btn.getAttribute('href') || btn.getAttribute('data-src');
             const title = btn.getAttribute('data-title') || 'Arte / Documento';
+            const fileType = btn.getAttribute('data-type') || ''; // 'pdf' or 'image'
             if (src) {
-                openMediaViewer(src, title);
+                openMediaViewer(src, title, fileType);
             }
         }
     });

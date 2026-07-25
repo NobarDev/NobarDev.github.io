@@ -109,5 +109,33 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <!-- Main JavaScript -->
     <script src="js/main.js"></script>
+    <!-- Auto-inject published cards from gestor-privado -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.querySelector('.behance-grid');
+            if (!grid) return;
+
+            const cards = JSON.parse(localStorage.getItem('published_cards_portafolio') || '[]');
+            cards.forEach(card => {
+                const tagsHTML = card.tags.map(t => `<span class="behance-tag">${t}</span>`).join('');
+                const dataType = card.isPdf ? ' data-type="pdf"' : '';
+                const articleHTML = `
+                <article class="behance-card" data-card-id="${card.id}" style="animation: fadeIn 0.4s ease forwards;">
+                    <div class="behance-media">
+                        <img src="${card.thumbnailSrc}" alt="${card.title}">
+                    </div>
+                    <div class="behance-info">
+                        <div class="behance-meta">
+                            <div class="behance-tags">${tagsHTML}</div>
+                            <h2 class="behance-title">${card.title}</h2>
+                            <p class="behance-description">${card.description}</p>
+                        </div>
+                        <a href="${card.fileSrc}" class="behance-btn view-media-btn" data-title="${card.title}"${dataType}>Ver</a>
+                    </div>
+                </article>`;
+                grid.insertAdjacentHTML('beforeend', articleHTML);
+            });
+        });
+    </script>
 </body>
 </html>

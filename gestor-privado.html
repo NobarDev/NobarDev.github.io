@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -66,9 +67,75 @@
             margin-bottom: 1.5rem;
         }
 
-        .dropzone:hover, .dropzone.dragover {
+        .dropzone:hover,
+        .dropzone.dragover {
             border-color: var(--accent-green);
             background: rgba(0, 255, 136, 0.05);
+        }
+
+        /* Thumbnail upload button */
+        .thumbnail-upload-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: var(--transition-fast);
+        }
+
+        .thumbnail-upload-row:hover {
+            border-color: var(--accent-orange);
+        }
+
+        .thumbnail-preview-small {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            flex-shrink: 0;
+        }
+
+        .thumbnail-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .thumbnail-info h5 {
+            font-size: 0.85rem;
+            color: var(--text-white);
+            margin-bottom: 0.15rem;
+        }
+
+        .thumbnail-info p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-thumbnail {
+            padding: 0.5rem 0.85rem;
+            border-radius: 8px;
+            border: 1px solid var(--accent-orange);
+            background: rgba(255, 107, 0, 0.1);
+            color: var(--accent-orange);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-thumbnail:hover {
+            background: var(--accent-orange);
+            color: var(--bg-black);
         }
 
         .dropzone-icon {
@@ -168,6 +235,29 @@
             color: var(--accent-green);
         }
 
+        .btn-publish {
+            width: 100%;
+            padding: 0.9rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--accent-orange);
+            background: var(--accent-orange);
+            color: var(--bg-black);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .btn-publish:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
+        }
+
         .history-list {
             margin-top: 1.5rem;
             display: flex;
@@ -194,8 +284,25 @@
             font-size: 0.78rem;
             color: var(--text-muted);
         }
+
+        .btn-delete-history {
+            background: none;
+            border: 1px solid rgba(255, 80, 80, 0.3);
+            color: #ff5050;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: var(--transition-fast);
+        }
+
+        .btn-delete-history:hover {
+            background: #ff5050;
+            color: #fff;
+        }
     </style>
 </head>
+
 <body style="overflow-y: auto;">
 
     <!-- NAV BAR PRIVADA -->
@@ -216,37 +323,57 @@
         <div class="admin-header">
             <span class="admin-badge"><i class="fa-solid fa-lock"></i> ÁREA PRIVADA DE ADMINISTRACIÓN</span>
             <h1>Gestor de Carga de Archivos & PDF</h1>
-            <p style="color: var(--text-muted);">Sube tus ilustraciones o archivos PDF para generar automáticamente las tarjetas listas para tu portafolio.</p>
+            <p style="color: var(--text-muted);">Sube tus ilustraciones o archivos PDF para generar automáticamente las
+                tarjetas listas para tu portafolio.</p>
         </div>
 
         <div class="admin-grid">
             <!-- Columna Izquierda: Formulario y Carga -->
             <div class="admin-card">
-                <h3 style="margin-bottom: 1.25rem;"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent-green);"></i> Cargar Nuevo Archivo</h3>
+                <h3 style="margin-bottom: 1.25rem;"><i class="fa-solid fa-cloud-arrow-up"
+                        style="color:var(--accent-green);"></i> Cargar Nuevo Archivo</h3>
 
                 <!-- Dropzone -->
                 <div class="dropzone" id="dropzone">
                     <i class="fa-solid fa-file-pdf dropzone-icon" id="dropzoneIcon"></i>
                     <h4 id="dropzoneText">Arrastra tu PDF o Imagen aquí</h4>
-                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem;">Formatos soportados: .pdf, .png, .jpg, .svg</p>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem;">Formatos soportados:
+                        .pdf, .png, .jpg, .svg</p>
                     <input type="file" id="fileInput" class="dropzone-input" accept=".pdf,.png,.jpg,.jpeg,.svg,.webp">
+                </div>
+
+                <!-- Thumbnail Upload Row -->
+                <div class="thumbnail-upload-row">
+                    <img src="assets/art_piece_1.png" alt="Miniatura" class="thumbnail-preview-small"
+                        id="thumbnailPreviewSmall">
+                    <div class="thumbnail-info">
+                        <h5><i class="fa-solid fa-image" style="color:var(--accent-orange);"></i> Miniatura de Tarjeta
+                        </h5>
+                        <p id="thumbnailFileName">Imagen que aparecerá en el portafolio</p>
+                    </div>
+                    <button type="button" class="btn-thumbnail" id="btnThumbnail"><i class="fa-solid fa-upload"></i>
+                        Subir</button>
+                    <input type="file" id="thumbnailInput" style="display:none;" accept=".png,.jpg,.jpeg,.webp,.svg">
                 </div>
 
                 <!-- Formulario -->
                 <form id="uploadForm">
                     <div class="form-group-admin">
                         <label for="itemTitle">Título de la Obra / Documento</label>
-                        <input type="text" id="itemTitle" class="form-input-admin" placeholder="Ej: Manual Steampunk Vol 1" required>
+                        <input type="text" id="itemTitle" class="form-input-admin"
+                            placeholder="Ej: Manual Steampunk Vol 1" required>
                     </div>
 
                     <div class="form-group-admin">
                         <label for="itemTags">Etiquetas / Tags (separadas por comas)</label>
-                        <input type="text" id="itemTags" class="form-input-admin" placeholder="Ej: Ilustración Vectorial, PDF, Concepto" required>
+                        <input type="text" id="itemTags" class="form-input-admin"
+                            placeholder="Ej: Ilustración Vectorial, PDF, Concepto" required>
                     </div>
 
                     <div class="form-group-admin">
                         <label for="itemDesc">Descripción de la Obra</label>
-                        <textarea id="itemDesc" class="form-input-admin" rows="3" placeholder="Describe brevemente el concepto visual o técnico..." required></textarea>
+                        <textarea id="itemDesc" class="form-input-admin" rows="3"
+                            placeholder="Describe brevemente el concepto visual o técnico..." required></textarea>
                     </div>
 
                     <div class="form-group-admin">
@@ -260,12 +387,16 @@
                     <button type="submit" class="btn-admin" id="btnGenerate">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> Generar Tarjeta & Código
                     </button>
+                    <button type="button" class="btn-publish" id="btnPublish">
+                        <i class="fa-solid fa-rocket"></i> Publicar Directamente en Página
+                    </button>
                 </form>
             </div>
 
             <!-- Columna Derecha: Vista Previa y Código HTML -->
             <div class="admin-card">
-                <h3 style="margin-bottom: 1.25rem;"><i class="fa-solid fa-eye" style="color:var(--accent-orange);"></i> Vista Previa de la Tarjeta</h3>
+                <h3 style="margin-bottom: 1.25rem;"><i class="fa-solid fa-eye" style="color:var(--accent-orange);"></i>
+                    Vista Previa de la Tarjeta</h3>
 
                 <!-- Contenedor Vista Previa Tarjeta -->
                 <div id="cardPreviewContainer" style="margin-bottom: 1.5rem;">
@@ -279,20 +410,26 @@
                                     <span class="behance-tag">Tag Ejemplo</span>
                                 </div>
                                 <h2 class="behance-title" id="previewTitle">Título de Obra</h2>
-                                <p class="behance-description" id="previewDescription">Tu descripción aparecerá aquí...</p>
+                                <p class="behance-description" id="previewDescription">Tu descripción aparecerá aquí...
+                                </p>
                             </div>
-                            <a href="assets/art_piece_1.png" class="behance-btn view-media-btn" id="previewBtn" data-title="Título de Obra">Ver</a>
+                            <a href="assets/art_piece_1.png" class="behance-btn view-media-btn" id="previewBtn"
+                                data-title="Título de Obra">Ver</a>
                         </div>
                     </article>
                 </div>
 
                 <h3><i class="fa-solid fa-code" style="color:var(--accent-purple);"></i> Código HTML Generado</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem;">Copia este código y pégalo directamente en <code>portafolio.html</code> o <code>proyectos.html</code>:</p>
-                <div class="code-preview-box" id="codeBox">&lt;!-- Selecciona o sube un archivo para generar el código --&gt;</div>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Copia este código y pégalo directamente en
+                    <code>portafolio.html</code> o <code>proyectos.html</code>:
+                </p>
+                <div class="code-preview-box" id="codeBox">&lt;!-- Selecciona o sube un archivo para generar el código
+                    --&gt;</div>
                 <button class="btn-copy" id="btnCopyCode"><i class="fa-solid fa-copy"></i> Copiar Código HTML</button>
 
                 <!-- Historial -->
-                <h4 style="margin-top: 2rem; color: var(--text-muted); font-family: var(--font-mono);">Archivos Subidos Recientemente</h4>
+                <h4 style="margin-top: 2rem; color: var(--text-muted); font-family: var(--font-mono);">Archivos Subidos
+                    Recientemente</h4>
                 <div class="history-list" id="historyList">
                     <p style="color: var(--text-muted); font-size: 0.85rem;">No hay archivos guardados aún.</p>
                 </div>
@@ -326,7 +463,27 @@
             const historyList = document.getElementById('historyList');
 
             let currentFileUrl = 'assets/art_piece_1.png';
+            let thumbnailUrl = '';
+            let thumbnailFileName = '';
             let isPdfFile = false;
+
+            // Thumbnail upload elements
+            const btnThumbnail = document.getElementById('btnThumbnail');
+            const thumbnailInput = document.getElementById('thumbnailInput');
+            const thumbnailPreviewSmall = document.getElementById('thumbnailPreviewSmall');
+            const thumbnailFileNameEl = document.getElementById('thumbnailFileName');
+
+            btnThumbnail.addEventListener('click', () => thumbnailInput.click());
+            thumbnailInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    thumbnailUrl = URL.createObjectURL(file);
+                    thumbnailFileName = file.name;
+                    thumbnailPreviewSmall.src = thumbnailUrl;
+                    thumbnailFileNameEl.textContent = file.name;
+                    updatePreview();
+                }
+            });
 
             // Trigger file dialog
             dropzone.addEventListener('click', () => fileInput.click());
@@ -354,7 +511,7 @@
             function handleFileSelect(file) {
                 dropzoneText.textContent = `Archivo seleccionado: ${file.name}`;
                 isPdfFile = file.name.toLowerCase().endsWith('.pdf');
-                
+
                 if (isPdfFile) {
                     dropzoneIcon.className = "fa-solid fa-file-pdf dropzone-icon";
                     dropzoneIcon.style.color = "var(--accent-orange)";
@@ -392,12 +549,17 @@
                 }
 
                 // Update media preview
-                const relativePath = fileInput.files.length > 0 ? `assets/${fileInput.files[0].name}` : currentFileUrl;
+                const mainFilePath = fileInput.files.length > 0 ? `assets/${fileInput.files[0].name}` : currentFileUrl;
+                const thumbPath = thumbnailFileName ? `assets/${thumbnailFileName}` : '';
                 previewBtn.setAttribute('href', currentFileUrl);
                 previewBtn.setAttribute('data-title', titleVal);
+                previewBtn.setAttribute('data-type', isPdfFile ? 'pdf' : 'image');
 
-                if (isPdfFile) {
-                    previewImg.src = 'assets/project_thumbnail_1.png'; // Thumbnail placeholder for PDF
+                // Use thumbnail if available, else fallback
+                if (thumbnailUrl) {
+                    previewImg.src = thumbnailUrl;
+                } else if (isPdfFile) {
+                    previewImg.src = 'assets/project_thumbnail_1.png';
                 } else {
                     previewImg.src = currentFileUrl;
                 }
@@ -406,11 +568,13 @@
                 const tagsHTML = (tagsArr.length > 0 ? tagsArr : ['Ilustración'])
                     .map(t => `            <span class="behance-tag">${t}</span>`).join('\n');
 
-                const generatedHTML = 
-`<!-- Obra: ${titleVal} -->
+                const dataTypeAttr = isPdfFile ? ' data-type="pdf"' : '';
+                const cardImgSrc = thumbPath || mainFilePath;
+                const generatedHTML =
+                    `<!-- Obra: ${titleVal} -->
 <article class="behance-card">
     <div class="behance-media">
-        <img src="${relativePath}" alt="${titleVal}">
+        <img src="${cardImgSrc}" alt="${titleVal}">
     </div>
     <div class="behance-info">
         <div class="behance-meta">
@@ -420,7 +584,7 @@ ${tagsHTML}
             <h2 class="behance-title">${titleVal}</h2>
             <p class="behance-description">${descVal}</p>
         </div>
-        <a href="${relativePath}" class="behance-btn view-media-btn" data-title="${titleVal}">Ver</a>
+        <a href="${mainFilePath}" class="behance-btn view-media-btn" data-title="${titleVal}"${dataTypeAttr}>Ver</a>
     </div>
 </article>`;
 
@@ -448,7 +612,8 @@ ${tagsHTML}
                     title,
                     fileName,
                     category,
-                    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    published: false
                 };
 
                 let saved = JSON.parse(localStorage.getItem('uploaded_portfolio_items') || '[]');
@@ -456,8 +621,90 @@ ${tagsHTML}
                 localStorage.setItem('uploaded_portfolio_items', JSON.stringify(saved));
 
                 renderHistory();
-                alert(`¡Obra "${title}" procesada con éxito! Copia el código HTML de la derecha y pégalo en tu archivo ${category}.html`);
+                alert(`¡Obra "${title}" procesada! Copia el código HTML o usa el botón "Publicar Directamente".`);
             });
+
+            // Publish Directly Button
+            const btnPublish = document.getElementById('btnPublish');
+            btnPublish.addEventListener('click', () => {
+                const title = itemTitle.value.trim();
+                const tags = itemTags.value.trim();
+                const desc = itemDesc.value.trim();
+                const category = itemCategory.value;
+
+                if (!title || !tags || !desc) {
+                    alert('Por favor completa todos los campos antes de publicar.');
+                    return;
+                }
+
+                const mainFile = fileInput.files.length > 0 ? fileInput.files[0].name : '';
+                const thumbFile = thumbnailFileName || mainFile;
+                const isPdf = mainFile.toLowerCase().endsWith('.pdf');
+
+                const cardData = {
+                    id: Date.now().toString(),
+                    title,
+                    tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+                    description: desc,
+                    thumbnailSrc: `assets/${thumbFile}`,
+                    fileSrc: `assets/${mainFile}`,
+                    isPdf,
+                    category,
+                    date: new Date().toLocaleDateString('es-ES')
+                };
+
+                // Save to published cards storage
+                const storageKey = `published_cards_${category}`;
+                let cards = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                cards.push(cardData);
+                localStorage.setItem(storageKey, JSON.stringify(cards));
+
+                // Also save to history as published
+                const historyItem = {
+                    title,
+                    fileName: mainFile || 'archivo',
+                    category,
+                    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    published: true,
+                    cardId: cardData.id
+                };
+                let saved = JSON.parse(localStorage.getItem('uploaded_portfolio_items') || '[]');
+                saved.unshift(historyItem);
+                localStorage.setItem('uploaded_portfolio_items', JSON.stringify(saved));
+
+                renderHistory();
+
+                // Visual feedback on button
+                const originalHTML = btnPublish.innerHTML;
+                btnPublish.innerHTML = '<i class="fa-solid fa-check"></i> ¡Publicado con Éxito!';
+                btnPublish.style.background = 'var(--accent-green)';
+                btnPublish.style.borderColor = 'var(--accent-green)';
+                setTimeout(() => {
+                    btnPublish.innerHTML = originalHTML;
+                    btnPublish.style.background = '';
+                    btnPublish.style.borderColor = '';
+                }, 3000);
+
+                const pageName = category === 'portafolio' ? 'portafolio.html' : 'proyectos.html';
+                alert(`¡"${title}" publicado en ${pageName}!\n\nRecarga la página ${pageName} para ver la tarjeta.\n\nIMPORTANTE: Asegúrate de colocar los archivos en la carpeta assets/.`);
+            });
+
+            // Delete published card
+            function deletePublishedCard(cardId, category) {
+                const storageKey = `published_cards_${category}`;
+                let cards = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                cards = cards.filter(c => c.id !== cardId);
+                localStorage.setItem(storageKey, JSON.stringify(cards));
+
+                let saved = JSON.parse(localStorage.getItem('uploaded_portfolio_items') || '[]');
+                saved = saved.filter(h => h.cardId !== cardId);
+                localStorage.setItem('uploaded_portfolio_items', JSON.stringify(saved));
+
+                renderHistory();
+            }
+
+            // Make deletePublishedCard accessible from inline onclick
+            window.deletePublishedCard = deletePublishedCard;
 
             function renderHistory() {
                 let saved = JSON.parse(localStorage.getItem('uploaded_portfolio_items') || '[]');
@@ -465,15 +712,25 @@ ${tagsHTML}
                     historyList.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem;">No hay archivos guardados aún.</p>`;
                     return;
                 }
-                historyList.innerHTML = saved.map((item, idx) => `
+                historyList.innerHTML = saved.map((item) => {
+                    const statusBadge = item.published
+                        ? `<span style="color:var(--accent-green); font-size:0.8rem;"><i class="fa-solid fa-circle-check"></i> Publicado</span>`
+                        : `<span style="color:var(--text-muted); font-size:0.8rem;"><i class="fa-solid fa-clipboard"></i> Solo código</span>`;
+                    const deleteBtn = item.published && item.cardId
+                        ? `<button class="btn-delete-history" onclick="deletePublishedCard('${item.cardId}', '${item.category}')"><i class="fa-solid fa-trash"></i></button>`
+                        : '';
+                    return `
                     <div class="history-item">
                         <div class="history-info">
                             <h4>${item.title}</h4>
                             <p>${item.fileName} &bull; ${item.category}.html &bull; ${item.date}</p>
                         </div>
-                        <span style="color:var(--accent-green); font-size:0.85rem;"><i class="fa-solid fa-circle-check"></i> Listo</span>
-                    </div>
-                `).join('');
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            ${statusBadge}
+                            ${deleteBtn}
+                        </div>
+                    </div>`;
+                }).join('');
             }
 
             renderHistory();
@@ -481,4 +738,5 @@ ${tagsHTML}
         });
     </script>
 </body>
+
 </html>
