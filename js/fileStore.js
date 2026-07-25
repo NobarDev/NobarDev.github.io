@@ -30,27 +30,31 @@ function openDB() {
  * @returns {Promise<string>} The id used to store the file
  */
 async function saveFile(id, file, fileName) {
+    // Read the file data FIRST before opening the transaction
+    const arrayBuffer = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsArrayBuffer(file);
+    });
+
+    // Now open the transaction and store the data
     const db = await openDB();
     return new Promise((resolve, reject) => {
         const tx = db.transaction(STORE_NAME, 'readwrite');
         const store = tx.objectStore(STORE_NAME);
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            const record = {
-                id,
-                data: reader.result, // ArrayBuffer
-                name: fileName,
-                type: file.type,
-                size: file.size,
-                savedAt: Date.now()
-            };
-            const req = store.put(record);
-            req.onsuccess = () => resolve(id);
-            req.onerror = () => reject(req.error);
+        const record = {
+            id,
+            data: arrayBuffer,
+            name: fileName,
+            type: file.type,
+            size: file.size,
+            savedAt: Date.now()
         };
-        reader.onerror = () => reject(reader.error);
-        reader.readAsArrayBuffer(file);
+        const req = store.put(record);
+        req.onsuccess = () => resolve(id);
+        req.onerror = () => reject(req.error);
     });
 }
 

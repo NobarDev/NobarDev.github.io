@@ -871,114 +871,137 @@ ${tagsHTML}
 
             // Publish Directly Button
             const btnPublish = document.getElementById('btnPublish');
-            btnPublish.addEventListener('click', async (e) => {
+            btnPublish.addEventListener('click', async function (e) {
                 e.preventDefault();
-                try {
-                    const title = itemTitle.value.trim();
-                    const tags = itemTags.value.trim();
-                    const desc = itemDesc.value.trim();
-                    const category = itemCategory.value;
+                e.stopPropagation();
+                console.log('[PUBLISH] Botón clickeado');
 
-                    if (!title || !tags || !desc) {
-                        alert('Por favor completa todos los campos de texto antes de publicar.');
-                        return;
-                    }
+                const title = itemTitle.value.trim();
+                const tags = itemTags.value.trim();
+                const desc = itemDesc.value.trim();
+                const category = itemCategory.value;
 
-                    if (!globalMainFile && currentFileUrl.includes('art_piece_1')) {
-                        alert('Por favor selecciona o arrastra un archivo (PDF o Imagen) antes de publicar.');
-                        return;
-                    }
+                console.log('[PUBLISH] Datos:', { title, tags, desc, category, hasFile: !!globalMainFile });
 
-                    const cardId = Date.now().toString();
-
-                    // Save files to IndexedDB
-                    let fileDbId = '';
-                    let thumbnailDbId = '';
-
-                    try {
-                        if (globalMainFile) {
-                            fileDbId = `file_${cardId}`;
-                            await window.FileStore.saveFile(fileDbId, globalMainFile, globalMainFile.name);
-
-                            // Si es una imagen y no hay miniatura personalizada, usar el archivo principal como miniatura
-                            if (!thumbnailInput.files.length && !isPdfFile) {
-                                thumbnailDbId = fileDbId;
-                            }
-                        }
-
-                        if (thumbnailInput.files.length > 0) {
-                            const thumbFileObj = thumbnailInput.files[0];
-                            thumbnailDbId = `thumb_${cardId}`;
-                            await window.FileStore.saveFile(thumbnailDbId, thumbFileObj, thumbFileObj.name);
-                        }
-                    } catch (err) {
-                        console.error("IndexedDB error:", err);
-                        alert("Error guardando los archivos localmente: " + err.message);
-                        return;
-                    }
-
-                    const mainFile = globalMainFile ? globalMainFile.name : '';
-                    const thumbFile = thumbnailFileName || mainFile;
-                    const isPdf = mainFile.toLowerCase().endsWith('.pdf');
-
-                    const cardData = {
-                        id: cardId,
-                        title,
-                        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
-                        description: desc,
-                        thumbnailSrc: `assets/${thumbFile}`,
-                        fileSrc: `assets/${mainFile}`,
-                        fileDbId,
-                        thumbnailDbId,
-                        isPdf,
-                        category,
-                        date: new Date().toLocaleDateString('es-ES')
-                    };
-
-                    // Save to published cards storage
-                    const storageKey = `published_cards_${category}`;
-                    let cards = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                    cards.push(cardData);
-                    localStorage.setItem(storageKey, JSON.stringify(cards));
-
-                    // Also save to history as published
-                    const historyItem = {
-                        title,
-                        fileName: mainFile || 'archivo',
-                        category,
-                        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        published: true,
-                        cardId: cardData.id
-                    };
-                    let saved = JSON.parse(localStorage.getItem('uploaded_portfolio_items') || '[]');
-                    saved.unshift(historyItem);
-                    localStorage.setItem('uploaded_portfolio_items', JSON.stringify(saved));
-
-                    renderHistory();
-
-                    // Show Success Modal
-                    const successModal = document.getElementById('successModal');
-                    const successModalMsg = document.getElementById('successModalMsg');
-                    const pageName = category === 'portafolio' ? 'portafolio.html' : 'proyectos.html';
-
-                    successModalMsg.innerHTML = `La tarjeta <strong>"${title}"</strong> ha sido añadida.<br><br>Puedes verla en <a href="${pageName}" style="color:var(--accent-orange); text-decoration:none;">${pageName}</a>.`;
-                    successModal.classList.add('active');
-
-                    // Visual feedback on button
-                    const originalHTML = btnPublish.innerHTML;
-                    btnPublish.innerHTML = '<i class="fa-solid fa-check"></i> ¡Publicado!';
-                    btnPublish.style.background = 'var(--accent-green)';
-                    btnPublish.style.borderColor = 'var(--accent-green)';
-                    setTimeout(() => {
-                        btnPublish.innerHTML = originalHTML;
-                        btnPublish.style.background = '';
-                        btnPublish.style.borderColor = '';
-                    }, 3000);
-
-                } catch (error) {
-                    console.error("Error al publicar:", error);
-                    alert("Ocurrió un error inesperado al publicar: " + error.message);
+                if (!title || !tags || !desc) {
+                    alert('Por favor completa todos los campos de texto antes de publicar.');
+                    return;
                 }
+
+                if (!globalMainFile) {
+                    alert('Por favor selecciona o arrastra un archivo (PDF o Imagen) antes de publicar.');
+                    return;
+                }
+
+                const cardId = Date.now().toString();
+                let fileDbId = '';
+                let thumbnailDbId = '';
+
+                // Save main file to IndexedDB
+                try {
+                    fileDbId = 'file_' + cardId;
+                    await window.FileStore.saveFile(fileDbId, globalMainFile, globalMainFile.name);
+                    console.log('[PUBLISH] Archivo principal guardado en IndexedDB:', fileDbId);
+
+                    // For images without custom thumbnail, reuse the main file
+                    if (!isPdfFile) {
+                        thumbnailDbId = fileDbId;
+                    }
+                } catch (err) {
+                    console.error('[PUBLISH] Error guardando archivo:', err);
+                    alert('Error guardando el archivo: ' + err.message);
+                    return;
+                }
+
+                // Save custom thumbnail if provided
+                try {
+                    if (thumbnailInput && thumbnailInput.files && thumbnailInput.files.length > 0) {
+                        thumbnailDbId = 'thumb_' + cardId;
+                        await window.FileStore.saveFile(thumbnailDbId, thumbnailInput.files[0], thumbnailInput.files[0].name);
+                        console.log('[PUBLISH] Miniatura guardada en IndexedDB:', thumbnailDbId);
+                    }
+                } catch (err) {
+                    console.warn('[PUBLISH] Error guardando miniatura (no crítico):', err);
+                }
+
+                var mainFileName = globalMainFile.name;
+                var thumbFileName = thumbnailFileName || mainFileName;
+                var fileIsPdf = mainFileName.toLowerCase().endsWith('.pdf');
+
+                var cardData = {
+                    id: cardId,
+                    title: title,
+                    tags: tags.split(',').map(function (t) { return t.trim(); }).filter(Boolean),
+                    description: desc,
+                    thumbnailSrc: 'assets/' + thumbFileName,
+                    fileSrc: 'assets/' + mainFileName,
+                    fileDbId: fileDbId,
+                    thumbnailDbId: thumbnailDbId,
+                    isPdf: fileIsPdf,
+                    category: category,
+                    date: new Date().toLocaleDateString('es-ES')
+                };
+
+                console.log('[PUBLISH] cardData:', cardData);
+
+                // Save to published cards storage
+                var storageKey = 'published_cards_' + category;
+                var existingCards = [];
+                try {
+                    existingCards = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                } catch (parseErr) {
+                    existingCards = [];
+                }
+                existingCards.push(cardData);
+                localStorage.setItem(storageKey, JSON.stringify(existingCards));
+                console.log('[PUBLISH] Guardado en localStorage key:', storageKey, 'total cards:', existingCards.length);
+
+                // Save to history
+                var historyItem = {
+                    title: title,
+                    fileName: mainFileName,
+                    category: category,
+                    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    published: true,
+                    cardId: cardId
+                };
+                var savedHistory = [];
+                try {
+                    savedHistory = JSON.parse(localStorage.getItem('uploaded_portfolio_items') || '[]');
+                } catch (parseErr2) {
+                    savedHistory = [];
+                }
+                savedHistory.unshift(historyItem);
+                localStorage.setItem('uploaded_portfolio_items', JSON.stringify(savedHistory));
+
+                renderHistory();
+                console.log('[PUBLISH] Historial actualizado');
+
+                // Show Success Modal
+                var successModalEl = document.getElementById('successModal');
+                var successMsgEl = document.getElementById('successModalMsg');
+                var pageName = (category === 'portafolio') ? 'portafolio.html' : 'proyectos.html';
+
+                if (successMsgEl) {
+                    successMsgEl.innerHTML = 'La tarjeta <strong>"' + title + '"</strong> ha sido añadida.<br><br>Puedes verla en <a href="' + pageName + '" style="color:var(--accent-orange); text-decoration:none;">' + pageName + '</a>.';
+                }
+                if (successModalEl) {
+                    successModalEl.classList.add('active');
+                    console.log('[PUBLISH] Modal de éxito mostrado');
+                } else {
+                    alert('¡"' + title + '" publicado! Abre ' + pageName + ' para verlo.');
+                }
+
+                // Visual feedback on button
+                var originalBtnHTML = btnPublish.innerHTML;
+                btnPublish.innerHTML = '<i class="fa-solid fa-check"></i> ¡Publicado!';
+                btnPublish.style.background = 'var(--accent-green)';
+                btnPublish.style.borderColor = 'var(--accent-green)';
+                setTimeout(function () {
+                    btnPublish.innerHTML = originalBtnHTML;
+                    btnPublish.style.background = '';
+                    btnPublish.style.borderColor = '';
+                }, 3000);
             });
 
             // Delete published card

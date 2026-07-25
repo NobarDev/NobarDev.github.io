@@ -2,7 +2,7 @@
 
 **Proyecto:** Portafolio Multidisciplinario de Jhonsons González  
 **Repositorio / Rama:** `NobarDev/NobarDev.github.io`  
-**Última actualización:** 2026-07-23  
+**Última actualización:** 2026-07-25  
 
 ---
 
@@ -41,17 +41,19 @@ El proyecto combina una estética visual impactante **Steampunk Industrial + Ne�
 ```
 Portafolio/
 │
-├── index.html          # Landing Page principal con scroll-snap de 4 secciones
-├── portafolio.html     # Galería estilo Behance para Arte e Ilustración Digital
-├── proyectos.html      # Catálogo interactivo de Software y Videojuegos (con filtros)
+├── index.html              # Landing Page principal con scroll-snap de 4 secciones
+├── portafolio.html         # Galería estilo Behance para Arte e Ilustración Digital
+├── proyectos.html          # Catálogo interactivo de Software y Videojuegos (con filtros)
+├── gestor-privado.html     # Panel privado de gestión de contenido (no indexado)
 │
 ├── css/
-│   └── style.css       # Sistema de estilos completo, variables, layout y componentes
+│   └── style.css           # Sistema de estilos completo, variables, layout y componentes
 │
 ├── js/
-│   └── main.js         # Lógica JS: Menú hamburguesa, Scroll Snap suave, Filtros y Formulario
+│   ├── main.js             # Lógica JS: Menú hamburguesa, Scroll Snap, Filtros, Lightbox
+│   └── fileStore.js        # Almacenamiento de archivos en IndexedDB del navegador
 │
-└── assets/             # Recursos gráficos generados
+└── assets/                 # Recursos gráficos generados
     ├── profile_avatar.png     # Avatar steampunk de Jhonsons
     ├── art_piece_1.png        # Ilustración "Clockwork Wings"
     ├── art_piece_2.png        # Ilustración técnica "Chronos Watch"
@@ -91,11 +93,22 @@ Portafolio/
 
 6. **Gestor Privado de Carga de Archivos (`gestor-privado.html` & `js/fileStore.js`):**
    - Página privada no enlazada en navegación y protegida con `<meta name="robots" content="noindex, nofollow">`.
-   - Selector de página destino estilizado en tarjetas/paneles interactivos (Portafolio / Proyectos) colocados en la cabecera.
-   - Cada tarjeta de selección incluye un botón "Gestionar Archivos" que abre un visor modal para listar y eliminar archivos subidos de esa página en particular, borrando de forma segura los datos de IndexedDB y localStorage.
-   - Área Drag & Drop para subir PDFs e imágenes principales, además de un control dedicado para subir una imagen de miniatura para la tarjeta.
-   - Guardado local automático de archivos en la base de datos **IndexedDB** del navegador, permitiendo persistencia y carga instantánea directa sin necesidad de mover archivos manualmente a la carpeta `assets/`.
+   - **Tarjetas de Destino de Publicación** ubicadas entre el título de administración y el gestor de carga. Cada tarjeta representa una sección independiente (Portafolio / Proyectos) con selección visual activa.
+   - Cada tarjeta de destino incluye un **botón "Gestionar Archivos"** que abre un modal para listar y eliminar archivos publicados de esa sección, borrando de forma segura los datos de IndexedDB y localStorage.
+   - **Área Drag & Drop** para subir PDFs e imágenes principales, además de un control dedicado para subir una imagen de miniatura.
+   - **Variable global `globalMainFile`:** Almacena la referencia al archivo seleccionado/arrastrado para evitar problemas de seguridad del navegador con `fileInput.files` en drag & drop.
+   - Guardado local automático de archivos en **IndexedDB** del navegador, permitiendo persistencia y carga instantánea sin mover archivos manualmente a `assets/`.
+   - **Botón "Publicar Directamente en Página":** Guarda el archivo en IndexedDB, crea la tarjeta en localStorage bajo la clave `published_cards_portafolio` o `published_cards_proyectos` según la selección, y muestra un modal de éxito.
+   - **Botón "Generar Tarjeta & Código":** Genera HTML copiable para insertar manualmente.
    - Vista previa en tiempo real y generador automático de código HTML para copiar con 1 clic.
+   - **Límite de descripción:** Máximo 150 caracteres con indicador visual para mantener la uniformidad de las tarjetas.
+   - **Historial de subidas recientes** con botón "Limpiar" para eliminar el historial sin afectar las tarjetas publicadas.
+   - **Modal de éxito** (`#successModal`): Ventana emergente con icono verde de confirmación, mensaje detallado y enlace directo a la página donde se publicó la tarjeta. Al cerrar, resetea el formulario para una nueva carga.
+
+7. **Inyección Dinámica de Tarjetas Publicadas:**
+   - **`portafolio.html`:** Script al final del body que lee `published_cards_portafolio` de localStorage, genera HTML con clases `behance-card`, `behance-media`, `behance-info`, `behance-tag`, y carga las imágenes desde IndexedDB vía `window.FileStore.loadFileAsURL()`.
+   - **`proyectos.html`:** Script equivalente que lee `published_cards_proyectos` y genera HTML con clases `project-card`, `project-thumbnail`, `project-details`, `project-badge`, `project-description`.
+   - Ambas páginas incluyen protección contra datos corruptos en localStorage (filtrado de nulls, fallbacks para propiedades faltantes).
 
 ---
 
@@ -109,7 +122,8 @@ Portafolio/
 | **Contacto (`#contactos`)** | 100% | Formulario estilizado y botón directo a WhatsApp. |
 | **Galería de Arte (`portafolio.html`)** | 100% | Vista estilo Behance con tags, descripciones, visor PDF interactivo y botones "Ver". |
 | **Galería de Proyectos (`proyectos.html`)** | 100% | Grid de proyectos de Software y Videojuegos con filtrado interactivo. |
-| **Gestor Privado (`gestor-privado.html`)** | 100% | Panel privado para subir PDFs/imágenes y generar tarjetas HTML sin indexación de Google. |
+| **Gestor Privado (`gestor-privado.html`)** | 100% | Panel privado completo con publicación directa, gestión de archivos y modal de éxito. |
+| **FileStore (`js/fileStore.js`)** | 100% | Almacenamiento IndexedDB funcional con bug crítico corregido (ver sección 7). |
 
 ---
 
@@ -117,11 +131,86 @@ Portafolio/
 
 - [x] **Visor / Lightbox PDF e Imágenes:** Implementado con zoom, manito de arrastre, desplazamiento a la izquierda y menú compartir.
 - [x] **Gestor Privado de Contenidos:** Creado con protección noindex de buscadores y generador de tarjetas.
+- [x] **Publicación Directa:** Botón funcional para publicar tarjetas directamente en Portafolio o Proyectos desde el gestor.
+- [x] **Modal de Éxito:** Ventana emergente de confirmación tras publicar exitosamente.
+- [x] **Gestión de Archivos:** Modal para eliminar archivos publicados por sección.
+- [x] **Historial con Limpieza:** Botón para limpiar historial de subidas recientes.
+- [x] **Tarjetas uniformes:** Descripciones limitadas a 150 caracteres y `line-clamp` en CSS.
 - [ ] **Integración Real del Formulario:** Conectar el formulario de contacto con un servicio backend como Formspree o EmailJS para recibir correos reales.
 - [ ] **Añadir más Proyectos/Obras:** Expandir el catálogo visual con nuevos proyectos desarrollados en Godot o documentos PDF reales.
 - [ ] **Despliegue a GitHub Pages:** Publicar los cambios en `https://nobardev.github.io/`.
 
 ---
 
-*Archivo de memoria actualizado para garantizar continuidad sin pérdida de contexto.*
+## 🐛 7. Bugs Corregidos y Lecciones Aprendidas
 
+### Bug Crítico: `TransactionInactiveError` en `fileStore.js` (2026-07-25)
+**Síntoma:** El botón "Publicar Directamente en Página" no hacía nada. No aparecía ni el modal de éxito ni la tarjeta en la página destino.
+
+**Causa Raíz:** En la función `saveFile()` de `js/fileStore.js`, se abría una transacción de IndexedDB y luego se iniciaba un `FileReader.readAsArrayBuffer()` (asíncrono). Para cuando el `reader.onload` disparaba, la transacción de IndexedDB ya se había cerrado automáticamente (las transacciones se cierran cuando no hay más operaciones síncronas pendientes).
+
+**Error en consola:**
+```
+Uncaught TransactionInactiveError: Failed to execute 'put' on 'IDBObjectStore': The transaction has finished.
+    at reader.onload (fileStore.js:48:31)
+```
+
+**Solución:** Reestructurar `saveFile()` para primero leer el archivo completo con `FileReader` (usando `await` + Promise), y solo después abrir la transacción de IndexedDB para guardar los datos. Así la transacción nunca se cierra prematuramente.
+
+**Código corregido (patrón correcto):**
+```javascript
+async function saveFile(id, file, fileName) {
+    // 1. Leer el archivo PRIMERO (asíncrono)
+    const arrayBuffer = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsArrayBuffer(file);
+    });
+
+    // 2. DESPUÉS abrir la transacción y guardar (síncrono dentro de la transacción)
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        const req = store.put({ id, data: arrayBuffer, name: fileName, ... });
+        req.onsuccess = () => resolve(id);
+        req.onerror = () => reject(req.error);
+    });
+}
+```
+
+### Bug: Clases CSS incorrectas en inyección dinámica de `proyectos.html`
+Las tarjetas publicadas en Proyectos usaban clases que no existían en `style.css` (ej: `.project-img-container`, `.project-info`, `.project-desc`). Se corrigieron a las clases correctas: `.project-thumbnail`, `.project-details`, `.project-description`, `.project-badge`.
+
+### Bug: Drag & Drop no adjuntaba archivo al `<input type="file">`
+Algunos navegadores bloquean `fileInput.files = e.dataTransfer.files` por seguridad. Se resolvió guardando el archivo arrastrado en una variable global `globalMainFile` que se usa directamente en la lógica de publicación, sin depender del `fileInput.files`.
+
+---
+
+## 🔧 8. Notas Técnicas Importantes
+
+### Almacenamiento de Datos
+- **localStorage** se usa para:
+  - `published_cards_portafolio` — Array de objetos con metadata de tarjetas publicadas en Portafolio.
+  - `published_cards_proyectos` — Array de objetos con metadata de tarjetas publicadas en Proyectos.
+  - `uploaded_portfolio_items` — Historial de todas las subidas (publicadas y solo código).
+- **IndexedDB** (`PortfolioFilesDB`, store `files`) se usa para almacenar los archivos binarios (PDFs e imágenes) con claves tipo `file_<timestamp>` y `thumb_<timestamp>`.
+
+### Independencia de Secciones
+Las secciones Portafolio y Proyectos son **100% independientes**:
+- Cada una tiene su propia clave de localStorage (`published_cards_portafolio` vs `published_cards_proyectos`).
+- Cada página lee solo su propia clave al inyectar tarjetas.
+- La selección de destino se controla con el `<input type="hidden" id="itemCategory">` que se actualiza al hacer clic en las tarjetas de destino.
+
+### Depuración del Botón Publicar
+El handler del botón "Publicar Directamente" incluye `console.log` con prefijo `[PUBLISH]` en cada paso para facilitar depuración futura:
+- `[PUBLISH] Botón clickeado`
+- `[PUBLISH] Datos: { title, tags, desc, category, hasFile }`
+- `[PUBLISH] Archivo principal guardado en IndexedDB`
+- `[PUBLISH] Guardado en localStorage key: ...`
+- `[PUBLISH] Modal de éxito mostrado`
+
+---
+
+*Archivo de memoria actualizado para garantizar continuidad sin pérdida de contexto.*

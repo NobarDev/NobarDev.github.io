@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portafolio Ilustración | Jhonsons González</title>
-    <meta name="description" content="Galaría de diseño gráfico e ilustraciones digitales de Jhonsons González al estilo Behance.">
+    <meta name="description"
+        content="Galaría de diseño gráfico e ilustraciones digitales de Jhonsons González al estilo Behance.">
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body style="overflow-y: auto;">
 
     <!-- NAV BAR -->
@@ -36,7 +39,8 @@
     <main class="subpage-container">
         <header class="subpage-header">
             <h1 class="subpage-title">Diseño & Arte</h1>
-            <p class="subpage-subtitle">Una colección de mis mejores ilustraciones digitales, afiches conceptuales y branding visual con una estética steampunk industrial.</p>
+            <p class="subpage-subtitle">Una colección de mis mejores ilustraciones digitales, afiches conceptuales y
+                branding visual con una estética steampunk industrial.</p>
         </header>
 
         <!-- Behance Grid -->
@@ -54,9 +58,12 @@
                             <span class="behance-tag">Steampunk</span>
                         </div>
                         <h2 class="behance-title">Chronos Wings Poster</h2>
-                        <p class="behance-description">Un diseño de cartel minimalista que representa la fusión del tiempo y el vuelo mecánico. Realizado íntegramente con herramientas vectoriales, jugando con gradientes cálidos y luces neón acentuadas.</p>
+                        <p class="behance-description">Un diseño de cartel minimalista que representa la fusión del
+                            tiempo y el vuelo mecánico. Realizado íntegramente con herramientas vectoriales, jugando con
+                            gradientes cálidos y luces neón acentuadas.</p>
                     </div>
-                    <a href="assets/art_piece_1.png" class="behance-btn view-media-btn" data-title="Chronos Wings Poster">Ver</a>
+                    <a href="assets/art_piece_1.png" class="behance-btn view-media-btn"
+                        data-title="Chronos Wings Poster">Ver</a>
                 </div>
             </article>
 
@@ -73,9 +80,12 @@
                             <span class="behance-tag">Glow-tech</span>
                         </div>
                         <h2 class="behance-title">Steampunk Watch Blueprint</h2>
-                        <p class="behance-description">Explosión esquemática de un reloj de bolsillo de vapor retro-futurista, con engranajes resaltados por luz ultravioleta y trazos finos minimalistas sobre fondo oscuro.</p>
+                        <p class="behance-description">Explosión esquemática de un reloj de bolsillo de vapor
+                            retro-futurista, con engranajes resaltados por luz ultravioleta y trazos finos minimalistas
+                            sobre fondo oscuro.</p>
                     </div>
-                    <a href="assets/art_piece_2.png" class="behance-btn view-media-btn" data-title="Steampunk Watch Blueprint">Ver</a>
+                    <a href="assets/art_piece_2.png" class="behance-btn view-media-btn"
+                        data-title="Steampunk Watch Blueprint">Ver</a>
                 </div>
             </article>
 
@@ -92,9 +102,12 @@
                             <span class="behance-tag">Branding</span>
                         </div>
                         <h2 class="behance-title">Neon Control UI</h2>
-                        <p class="behance-description">Concepto de interfaz de usuario oscura con acentos de neón verde y naranja. Sistema de paneles modulares diseñado para aplicaciones de monitoreo industrial con estética cyberpunk.</p>
+                        <p class="behance-description">Concepto de interfaz de usuario oscura con acentos de neón verde
+                            y naranja. Sistema de paneles modulares diseñado para aplicaciones de monitoreo industrial
+                            con estética cyberpunk.</p>
                     </div>
-                    <a href="assets/project_thumbnail_1.png" class="behance-btn view-media-btn" data-title="Neon Control UI">Ver</a>
+                    <a href="assets/project_thumbnail_1.png" class="behance-btn view-media-btn"
+                        data-title="Neon Control UI">Ver</a>
                 </div>
             </article>
         </div>
@@ -102,7 +115,8 @@
 
     <!-- FOOTER -->
     <footer style="margin-top: 5rem;">
-        <p>&copy; 2026 Jhonsons González. Todos los derechos reservados. Diseñado & programado con <span class="highlight-orange">Pasión</span>.</p>
+        <p>&copy; 2026 Jhonsons González. Todos los derechos reservados. Diseñado & programado con <span
+                class="highlight-orange">Pasión</span>.</p>
     </footer>
 
     <!-- PDF.js Library for PDF Rendering -->
@@ -122,7 +136,7 @@
                 const tagsArr = Array.isArray(card.tags) ? card.tags : [];
                 const tagsHTML = tagsArr.map(t => `<span class="behance-tag">${t}</span>`).join('');
                 const dataType = card.isPdf ? ' data-type="pdf"' : '';
-                
+
                 // Fallbacks to standard relative path
                 let finalThumbSrc = card.thumbnailSrc || 'assets/art_piece_1.png';
                 let finalFileSrc = card.fileSrc || '#';
@@ -173,4 +187,5 @@
         });
     </script>
 </body>
+
 </html>
