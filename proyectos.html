@@ -149,6 +149,7 @@
 
     <!-- PDF.js Library for PDF Rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="js/fileStore.js"></script>
     <!-- Main JavaScript -->
     <script src="js/main.js"></script>
     <!-- Auto-inject published cards from gestor-privado -->
@@ -158,26 +159,57 @@
             if (!grid) return;
 
             const cards = JSON.parse(localStorage.getItem('published_cards_proyectos') || '[]');
-            cards.forEach(card => {
+            cards.forEach(async (card) => {
                 const tagsHTML = card.tags.map(t => `<span class="project-tag">${t}</span>`).join('');
                 const dataType = card.isPdf ? ' data-type="pdf"' : '';
+                
+                let finalThumbSrc = card.thumbnailSrc;
+                let finalFileSrc = card.fileSrc;
+
+                const cardId = card.id;
                 const articleHTML = `
-                <article class="project-card" data-category="all" data-card-id="${card.id}" style="animation: fadeIn 0.4s ease forwards;">
+                <article class="project-card" data-category="all" data-card-id="${cardId}" style="animation: fadeIn 0.4s ease forwards;">
                     <div class="project-img-container">
-                        <img src="${card.thumbnailSrc}" alt="${card.title}">
+                        <img src="${finalThumbSrc}" alt="${card.title}" id="img-${cardId}">
                     </div>
                     <div class="project-info">
                         <div class="project-tags">${tagsHTML}</div>
                         <h2 class="project-title">${card.title}</h2>
                         <p class="project-desc">${card.description}</p>
                         <div class="project-links">
-                            <a href="${card.fileSrc}" class="project-link highlight-green view-media-btn" data-title="${card.title}"${dataType}>
+                            <a href="${finalFileSrc}" class="project-link highlight-green view-media-btn" id="btn-${cardId}" data-title="${card.title}"${dataType}>
                                 <i class="fa-solid fa-eye"></i> Ver
                             </a>
                         </div>
                     </div>
                 </article>`;
                 grid.insertAdjacentHTML('beforeend', articleHTML);
+
+                // If IndexedDB references exist, load them dynamically
+                if (window.FileStore) {
+                    if (card.thumbnailDbId) {
+                        try {
+                            const res = await window.FileStore.loadFileAsURL(card.thumbnailDbId);
+                            if (res && res.url) {
+                                const imgEl = document.getElementById(`img-${cardId}`);
+                                if (imgEl) imgEl.src = res.url;
+                            }
+                        } catch (e) {
+                            console.error("Error loading thumbnail from DB:", e);
+                        }
+                    }
+                    if (card.fileDbId) {
+                        try {
+                            const res = await window.FileStore.loadFileAsURL(card.fileDbId);
+                            if (res && res.url) {
+                                const btnEl = document.getElementById(`btn-${cardId}`);
+                                if (btnEl) btnEl.setAttribute('href', res.url);
+                            }
+                        } catch (e) {
+                            console.error("Error loading file from DB:", e);
+                        }
+                    }
+                }
             });
         });
     </script>

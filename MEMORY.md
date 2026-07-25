@@ -89,9 +89,12 @@ Portafolio/
    - Barra de herramientas derecha: Zoom deslizante (100%-300%), modo manito de arrastre (`grab`/`grabbing`), navegación de páginas (que se deshabilita al hacer zoom), y menú de redes sociales (WhatsApp, X, Facebook, Instagram).
    - Reemplazo de etiquetas de botones a `"Ver"`.
 
-6. **Gestor Privado de Carga de Archivos (`gestor-privado.html`):**
+6. **Gestor Privado de Carga de Archivos (`gestor-privado.html` & `js/fileStore.js`):**
    - Página privada no enlazada en navegación y protegida con `<meta name="robots" content="noindex, nofollow">`.
-   - Área Drag & Drop para subir PDFs e imágenes.
+   - Selector de página destino estilizado en tarjetas/paneles interactivos (Portafolio / Proyectos) colocados en la cabecera.
+   - Cada tarjeta de selección incluye un botón "Gestionar Archivos" que abre un visor modal para listar y eliminar archivos subidos de esa página en particular, borrando de forma segura los datos de IndexedDB y localStorage.
+   - Área Drag & Drop para subir PDFs e imágenes principales, además de un control dedicado para subir una imagen de miniatura para la tarjeta.
+   - Guardado local automático de archivos en la base de datos **IndexedDB** del navegador, permitiendo persistencia y carga instantánea directa sin necesidad de mover archivos manualmente a la carpeta `assets/`.
    - Vista previa en tiempo real y generador automático de código HTML para copiar con 1 clic.
 
 ---

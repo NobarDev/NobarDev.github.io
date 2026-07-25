@@ -830,6 +830,11 @@ body > header {
     font-size: 0.95rem;
     line-height: 1.6;
     margin-bottom: 1.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .project-links {
@@ -933,6 +938,11 @@ body > header {
     color: var(--text-muted);
     line-height: 1.6;
     font-size: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .behance-btn {
@@ -1256,18 +1266,11 @@ footer {
     transition: transform 0.15s ease-out;
 }
 
-.pdf-canvas-wrapper canvas {
-    width: 92%;
-    height: auto;
-    display: block;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: #ffffff;
-}
-
+.pdf-canvas-wrapper canvas,
 .pdf-canvas-wrapper img {
-    max-width: 92%;
+    max-width: 95%;
+    max-height: 78vh;
+    width: auto;
     height: auto;
     display: block;
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
