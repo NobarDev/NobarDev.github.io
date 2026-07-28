@@ -165,72 +165,53 @@
 
     <!-- PDF.js Library for PDF Rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="js/fileStore.js"></script>
     <!-- Main JavaScript -->
     <script src="js/main.js"></script>
-    <!-- Auto-inject published cards from gestor-privado -->
+    <!-- Auto-inject published cards from JSON -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const grid = document.querySelector('.projects-grid');
             if (!grid) return;
 
-            const cards = JSON.parse(localStorage.getItem('published_cards_proyectos') || '[]');
-            cards.forEach(async (card) => {
-                if (!card) return;
-                const tagsArr = Array.isArray(card.tags) ? card.tags : [];
-                const tagsHTML = tagsArr.map(t => `<span class="project-badge badge-web">${t}</span>`).join('');
-                const dataType = card.isPdf ? ' data-type="pdf"' : '';
+            try {
+                const response = await fetch('data/publicaciones.json');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                const cards = data.proyectos || [];
 
-                let finalThumbSrc = card.thumbnailSrc || 'assets/art_piece_1.png';
-                let finalFileSrc = card.fileSrc || '#';
+                cards.forEach((card) => {
+                    if (!card) return;
+                    const tagsArr = Array.isArray(card.tags) ? card.tags : [];
+                    const tagsHTML = tagsArr.map(t => `<span class="project-badge badge-web">${t}</span>`).join('');
+                    const dataType = card.isPdf ? ' data-type="pdf"' : '';
 
-                const cardId = card.id || Date.now().toString();
-                const articleHTML = `
-                <article class="project-card" data-category="all" data-card-id="${cardId}" style="animation: fadeIn 0.4s ease forwards;">
-                    <div class="project-thumbnail">
-                        <img src="${finalThumbSrc}" alt="${card.title}" id="img-${cardId}">
-                    </div>
-                    <div class="project-details">
-                        <div class="project-meta">
-                            ${tagsHTML}
+                    let finalThumbSrc = card.thumbnailSrc || 'assets/art_piece_1.png';
+                    let finalFileSrc = card.fileSrc || '#';
+
+                    const cardId = card.id || Date.now().toString();
+                    const articleHTML = `
+                    <article class="project-card" data-category="all" data-card-id="${cardId}" style="animation: fadeIn 0.4s ease forwards;">
+                        <div class="project-thumbnail">
+                            <img src="${finalThumbSrc}" alt="${card.title}" id="img-${cardId}">
                         </div>
-                        <h2 class="project-title">${card.title}</h2>
-                        <p class="project-description">${card.description}</p>
-                        <div class="project-links">
-                            <a href="${finalFileSrc}" class="project-link highlight-green view-media-btn" id="btn-${cardId}" data-title="${card.title}"${dataType}>
-                                <i class="fa-solid fa-eye"></i> Ver
-                            </a>
+                        <div class="project-details">
+                            <div class="project-meta">
+                                ${tagsHTML}
+                            </div>
+                            <h2 class="project-title">${card.title}</h2>
+                            <p class="project-description">${card.description}</p>
+                            <div class="project-links">
+                                <a href="${finalFileSrc}" class="project-link highlight-green view-media-btn" id="btn-${cardId}" data-title="${card.title}"${dataType}>
+                                    <i class="fa-solid fa-eye"></i> Ver
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                </article>`;
-                grid.insertAdjacentHTML('beforeend', articleHTML);
-
-                // If IndexedDB references exist, load them dynamically
-                if (window.FileStore) {
-                    if (card.thumbnailDbId) {
-                        try {
-                            const res = await window.FileStore.loadFileAsURL(card.thumbnailDbId);
-                            if (res && res.url) {
-                                const imgEl = document.getElementById(`img-${cardId}`);
-                                if (imgEl) imgEl.src = res.url;
-                            }
-                        } catch (e) {
-                            console.error("Error loading thumbnail from DB:", e);
-                        }
-                    }
-                    if (card.fileDbId) {
-                        try {
-                            const res = await window.FileStore.loadFileAsURL(card.fileDbId);
-                            if (res && res.url) {
-                                const btnEl = document.getElementById(`btn-${cardId}`);
-                                if (btnEl) btnEl.setAttribute('href', res.url);
-                            }
-                        } catch (e) {
-                            console.error("Error loading file from DB:", e);
-                        }
-                    }
-                }
-            });
+                    </article>`;
+                    grid.insertAdjacentHTML('beforeend', articleHTML);
+                });
+            } catch (error) {
+                console.error("Error cargando proyectos:", error);
+            }
         });
     </script>
 </body>

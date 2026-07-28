@@ -669,7 +669,7 @@
 
     <!-- PDF.js & Main Script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="js/fileStore.js"></script>
+    <script src="js/githubApi.js"></script>
     <script src="js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -846,26 +846,10 @@ ${tagsHTML}
                 });
             });
 
-            // Handle Form Submission (Save to local history)
+            // Handle Form Submission
             uploadForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const title = itemTitle.value.trim();
-                const category = itemCategory.value;
-                const fileName = globalMainFile ? globalMainFile.name : 'archivo_ejemplo';
-
-                const newHistoryItem = {
-                    title,
-                    fileName,
-                    category,
-                    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    published: false
-                };
-
-                let saved = JSON.parse(localStorage.getItem('uploaded_portfolio_items') || '[]');
-                saved.unshift(newHistoryItem);
-                localStorage.setItem('uploaded_portfolio_items', JSON.stringify(saved));
-
-                renderHistory();
                 alert(`¡Obra "${title}" procesada! Copia el código HTML o usa el botón "Publicar Directamente".`);
             });
 
@@ -893,169 +877,109 @@ ${tagsHTML}
                     return;
                 }
 
-                const cardId = Date.now().toString();
-                let fileDbId = '';
-                let thumbnailDbId = '';
+                // Show loading state
+                const originalBtnHTML = btnPublish.innerHTML;
+                btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publicando...';
+                btnPublish.style.pointerEvents = 'none';
 
-                // Save main file to IndexedDB
                 try {
-                    fileDbId = 'file_' + cardId;
-                    await window.FileStore.saveFile(fileDbId, globalMainFile, globalMainFile.name);
-                    console.log('[PUBLISH] Archivo principal guardado en IndexedDB:', fileDbId);
+                    const cardId = Date.now().toString();
+                    
+                    const mainFileName = globalMainFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+                    const mainFilePath = `assets/uploads/${cardId}_${mainFileName}`;
+                    await window.GitHubAPI.uploadFileToGitHub(mainFilePath, globalMainFile);
 
-                    // For images without custom thumbnail, reuse the main file
-                    if (!isPdfFile) {
-                        thumbnailDbId = fileDbId;
-                    }
-                } catch (err) {
-                    console.error('[PUBLISH] Error guardando archivo:', err);
-                    alert('Error guardando el archivo: ' + err.message);
-                    return;
-                }
-
-                // Save custom thumbnail if provided
-                try {
+                    let thumbFilePath = mainFilePath;
                     if (thumbnailInput && thumbnailInput.files && thumbnailInput.files.length > 0) {
-                        thumbnailDbId = 'thumb_' + cardId;
-                        await window.FileStore.saveFile(thumbnailDbId, thumbnailInput.files[0], thumbnailInput.files[0].name);
-                        console.log('[PUBLISH] Miniatura guardada en IndexedDB:', thumbnailDbId);
+                        const thumbFileName = thumbnailInput.files[0].name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+                        thumbFilePath = `assets/uploads/thumb_${cardId}_${thumbFileName}`;
+                        await window.GitHubAPI.uploadFileToGitHub(thumbFilePath, thumbnailInput.files[0]);
                     }
+
+                    const cardData = {
+                        id: cardId,
+                        title: title,
+                        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+                        description: desc,
+                        thumbnailSrc: thumbFilePath,
+                        fileSrc: mainFilePath,
+                        isPdf: mainFileName.toLowerCase().endsWith('.pdf'),
+                        category: category,
+                        date: new Date().toLocaleDateString('es-ES')
+                    };
+
+                    const jsonRes = await window.GitHubAPI.getPublicacionesJSON();
+                    const jsonData = jsonRes.content;
+                    
+                    if (!jsonData[category]) jsonData[category] = [];
+                    jsonData[category].push(cardData);
+
+                    await window.GitHubAPI.savePublicacionesJSON(jsonData, jsonRes.sha);
+
+                    // Show Success Modal
+                    const successModalEl = document.getElementById('successModal');
+                    const successMsgEl = document.getElementById('successModalMsg');
+                    const pageName = (category === 'portafolio') ? 'portafolio.html' : 'proyectos.html';
+
+                    if (successMsgEl) {
+                        successMsgEl.innerHTML = `La tarjeta <strong>"${title}"</strong> ha sido añadida.<br><br>Puedes verla en <a href="${pageName}" style="color:var(--accent-orange); text-decoration:none;">${pageName}</a>.`;
+                    }
+                    if (successModalEl) {
+                        successModalEl.classList.add('active');
+                    } else {
+                        alert(`¡"${title}" publicado! Abre ${pageName} para verlo.`);
+                    }
+
+                    btnPublish.innerHTML = '<i class="fa-solid fa-check"></i> ¡Publicado!';
+                    btnPublish.style.background = 'var(--accent-green)';
+                    btnPublish.style.borderColor = 'var(--accent-green)';
+                    setTimeout(() => {
+                        btnPublish.innerHTML = originalBtnHTML;
+                        btnPublish.style.background = '';
+                        btnPublish.style.borderColor = '';
+                        btnPublish.style.pointerEvents = 'auto';
+                    }, 3000);
                 } catch (err) {
-                    console.warn('[PUBLISH] Error guardando miniatura (no crítico):', err);
-                }
-
-                var mainFileName = globalMainFile.name;
-                var thumbFileName = thumbnailFileName || mainFileName;
-                var fileIsPdf = mainFileName.toLowerCase().endsWith('.pdf');
-
-                var cardData = {
-                    id: cardId,
-                    title: title,
-                    tags: tags.split(',').map(function (t) { return t.trim(); }).filter(Boolean),
-                    description: desc,
-                    thumbnailSrc: 'assets/' + thumbFileName,
-                    fileSrc: 'assets/' + mainFileName,
-                    fileDbId: fileDbId,
-                    thumbnailDbId: thumbnailDbId,
-                    isPdf: fileIsPdf,
-                    category: category,
-                    date: new Date().toLocaleDateString('es-ES')
-                };
-
-                console.log('[PUBLISH] cardData:', cardData);
-
-                // Save to published cards storage
-                var storageKey = 'published_cards_' + category;
-                var existingCards = [];
-                try {
-                    existingCards = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                } catch (parseErr) {
-                    existingCards = [];
-                }
-                existingCards.push(cardData);
-                localStorage.setItem(storageKey, JSON.stringify(existingCards));
-                console.log('[PUBLISH] Guardado en localStorage key:', storageKey, 'total cards:', existingCards.length);
-
-                // Save to history
-                var historyItem = {
-                    title: title,
-                    fileName: mainFileName,
-                    category: category,
-                    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    published: true,
-                    cardId: cardId
-                };
-                var savedHistory = [];
-                try {
-                    savedHistory = JSON.parse(localStorage.getItem('uploaded_portfolio_items') || '[]');
-                } catch (parseErr2) {
-                    savedHistory = [];
-                }
-                savedHistory.unshift(historyItem);
-                localStorage.setItem('uploaded_portfolio_items', JSON.stringify(savedHistory));
-
-                renderHistory();
-                console.log('[PUBLISH] Historial actualizado');
-
-                // Show Success Modal
-                var successModalEl = document.getElementById('successModal');
-                var successMsgEl = document.getElementById('successModalMsg');
-                var pageName = (category === 'portafolio') ? 'portafolio.html' : 'proyectos.html';
-
-                if (successMsgEl) {
-                    successMsgEl.innerHTML = 'La tarjeta <strong>"' + title + '"</strong> ha sido añadida.<br><br>Puedes verla en <a href="' + pageName + '" style="color:var(--accent-orange); text-decoration:none;">' + pageName + '</a>.';
-                }
-                if (successModalEl) {
-                    successModalEl.classList.add('active');
-                    console.log('[PUBLISH] Modal de éxito mostrado');
-                } else {
-                    alert('¡"' + title + '" publicado! Abre ' + pageName + ' para verlo.');
-                }
-
-                // Visual feedback on button
-                var originalBtnHTML = btnPublish.innerHTML;
-                btnPublish.innerHTML = '<i class="fa-solid fa-check"></i> ¡Publicado!';
-                btnPublish.style.background = 'var(--accent-green)';
-                btnPublish.style.borderColor = 'var(--accent-green)';
-                setTimeout(function () {
+                    console.error('[PUBLISH] Error:', err);
+                    alert('Error al publicar: ' + err.message);
                     btnPublish.innerHTML = originalBtnHTML;
-                    btnPublish.style.background = '';
-                    btnPublish.style.borderColor = '';
-                }, 3000);
+                    btnPublish.style.pointerEvents = 'auto';
+                }
             });
 
             // Delete published card
             async function deletePublishedCard(cardId, category) {
-                const storageKey = `published_cards_${category}`;
-                let cards = JSON.parse(localStorage.getItem(storageKey) || '[]');
-                const cardToDelete = cards.find(c => c.id === cardId);
-                if (cardToDelete) {
-                    try {
-                        if (cardToDelete.fileDbId) await window.FileStore.deleteFile(cardToDelete.fileDbId);
-                        if (cardToDelete.thumbnailDbId) await window.FileStore.deleteFile(cardToDelete.thumbnailDbId);
-                    } catch (e) {
-                        console.error("Error deleting from IndexedDB:", e);
+                try {
+                    const jsonRes = await window.GitHubAPI.getPublicacionesJSON();
+                    const jsonData = jsonRes.content;
+                    
+                    const cards = jsonData[category] || [];
+                    const cardToDelete = cards.find(c => c.id === cardId);
+                    
+                    if (cardToDelete) {
+                        if (cardToDelete.fileSrc) {
+                            await window.GitHubAPI.deleteFileFromGitHub(cardToDelete.fileSrc);
+                        }
+                        if (cardToDelete.thumbnailSrc && cardToDelete.thumbnailSrc !== cardToDelete.fileSrc) {
+                            await window.GitHubAPI.deleteFileFromGitHub(cardToDelete.thumbnailSrc);
+                        }
+                        
+                        jsonData[category] = cards.filter(c => c.id !== cardId);
+                        await window.GitHubAPI.savePublicacionesJSON(jsonData, jsonRes.sha);
+                        alert("Archivo eliminado correctamente.");
                     }
+                } catch (e) {
+                    console.error("Error al eliminar el archivo:", e);
+                    alert("Error al eliminar: " + e.message);
                 }
-
-                cards = cards.filter(c => c.id !== cardId);
-                localStorage.setItem(storageKey, JSON.stringify(cards));
-
-                let saved = JSON.parse(localStorage.getItem('uploaded_portfolio_items') || '[]');
-                saved = saved.filter(h => h.cardId !== cardId);
-                localStorage.setItem('uploaded_portfolio_items', JSON.stringify(saved));
-
-                renderHistory();
             }
 
-            // Make deletePublishedCard accessible from inline onclick
             window.deletePublishedCard = deletePublishedCard;
 
             function renderHistory() {
-                let saved = JSON.parse(localStorage.getItem('uploaded_portfolio_items') || '[]');
-                if (saved.length === 0) {
-                    historyList.innerHTML = `<p style="color: var(--text-muted); font-size: 0.85rem;">No hay archivos guardados aún.</p>`;
-                    return;
+                if (historyList) {
+                    historyList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">El historial local ha sido desactivado a favor del control centralizado de GitHub.</p>';
                 }
-                historyList.innerHTML = saved.map((item) => {
-                    const statusBadge = item.published
-                        ? `<span style="color:var(--accent-green); font-size:0.8rem;"><i class="fa-solid fa-circle-check"></i> Publicado</span>`
-                        : `<span style="color:var(--text-muted); font-size:0.8rem;"><i class="fa-solid fa-clipboard"></i> Solo código</span>`;
-                    const deleteBtn = item.published && item.cardId
-                        ? `<button class="btn-delete-history" onclick="deletePublishedCard('${item.cardId}', '${item.category}')"><i class="fa-solid fa-trash"></i></button>`
-                        : '';
-                    return `
-                    <div class="history-item">
-                        <div class="history-info">
-                            <h4>${item.title}</h4>
-                            <p>${item.fileName} &bull; ${item.category}.html &bull; ${item.date}</p>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:0.5rem;">
-                            ${statusBadge}
-                            ${deleteBtn}
-                        </div>
-                    </div>`;
-                }).join('');
             }
 
             // Destination Cards selection behavior
@@ -1101,34 +1025,41 @@ ${tagsHTML}
                 });
             }
 
-            function openManageModal(category) {
+            async function openManageModal(category) {
                 const titleText = category === 'portafolio' ? 'Portafolio (Ilustraciones)' : 'Proyectos (Software)';
                 manageCategoryTitle.textContent = titleText;
 
-                populateManageFiles(category);
+                manageFilesList.innerHTML = `<p style="text-align:center; padding: 2rem 0;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</p>`;
                 manageModal.classList.add('active');
+
+                await populateManageFiles(category);
             }
 
-            function populateManageFiles(category) {
-                const storageKey = `published_cards_${category}`;
-                const cards = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            async function populateManageFiles(category) {
+                try {
+                    const jsonRes = await window.GitHubAPI.getPublicacionesJSON();
+                    const cards = jsonRes.content[category] || [];
 
-                if (cards.length === 0) {
-                    manageFilesList.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding: 2rem 0;">No hay archivos publicados en esta sección.</p>`;
-                    return;
-                }
+                    if (cards.length === 0) {
+                        manageFilesList.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding: 2rem 0;">No hay archivos publicados en esta sección.</p>`;
+                        return;
+                    }
 
-                manageFilesList.innerHTML = cards.map(card => `
-                    <div class="manage-file-item" id="item-row-${card.id}">
-                        <div class="manage-file-info">
-                            <h4>${card.title}</h4>
-                            <p>${card.fileSrc.replace('assets/', '')} &bull; ${card.date}</p>
+                    manageFilesList.innerHTML = cards.map(card => `
+                        <div class="manage-file-item" id="item-row-${card.id}">
+                            <div class="manage-file-info">
+                                <h4>${card.title}</h4>
+                                <p>${card.fileSrc.replace('assets/', '')} &bull; ${card.date}</p>
+                            </div>
+                            <button type="button" class="btn-delete-file" onclick="deleteFileFromManager('${card.id}', '${category}')" title="Eliminar Archivo">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </div>
-                        <button type="button" class="btn-delete-file" onclick="deleteFileFromManager('${card.id}', '${category}')" title="Eliminar Archivo">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-                `).join('');
+                    `).join('');
+                } catch (e) {
+                    console.error("Error cargando archivos:", e);
+                    manageFilesList.innerHTML = `<p style="color:red; text-align:center;">Error al cargar: ${e.message}</p>`;
+                }
             }
 
             // Expose delete action inside modal
@@ -1136,7 +1067,7 @@ ${tagsHTML}
                 if (confirm('¿Estás seguro de que deseas eliminar este archivo publicado? Esta acción no se puede deshacer.')) {
                     await deletePublishedCard(cardId, category);
                     // Refresh modal list
-                    populateManageFiles(category);
+                    await populateManageFiles(category);
                 }
             }
             window.deleteFileFromManager = deleteFileFromManager;
