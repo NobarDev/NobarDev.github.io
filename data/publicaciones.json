@@ -1,4 +1,103 @@
 {
-  "portafolio": [],
-  "proyectos": []
+  "portafolio": [
+    {
+      "id": "default_portafolio_1",
+      "title": "Chronos Wings Poster",
+      "tags": [
+        "Ilustración Vectorial",
+        "Afiche",
+        "Steampunk"
+      ],
+      "description": "Un diseño de cartel minimalista que representa la fusión del tiempo y el vuelo mecánico. Realizado íntegramente con herramientas vectoriales, jugando con gradientes cálidos y luces neón acentuadas.",
+      "thumbnailSrc": "assets/uploads/thumb_default_portafolio_1_xp.jpg",
+      "fileSrc": "assets/art_piece_1.png",
+      "isPdf": false,
+      "category": "portafolio",
+      "date": "2026"
+    },
+    {
+      "id": "default_portafolio_2",
+      "title": "Steampunk Watch Blueprint",
+      "tags": [
+        "Modelado Conceptual",
+        "Ilustración Técnica",
+        "Glow-tech"
+      ],
+      "description": "Explosión esquemática de un reloj de bolsillo de vapor retro-futurista, con engranajes resaltados por luz ultravioleta y trazos finos minimalistas sobre fondo oscuro.",
+      "thumbnailSrc": "assets/art_piece_2.png",
+      "fileSrc": "assets/art_piece_2.png",
+      "isPdf": false,
+      "category": "portafolio",
+      "date": "2025"
+    },
+    {
+      "id": "default_portafolio_3",
+      "title": "Neon Control UI",
+      "tags": [
+        "UI / UX",
+        "Neon Design",
+        "Branding"
+      ],
+      "description": "Concepto de interfaz de usuario oscura con acentos de neón verde y naranja. Sistema de paneles modulares diseñado para aplicaciones de monitoreo industrial con estética cyberpunk.",
+      "thumbnailSrc": "assets/project_thumbnail_1.png",
+      "fileSrc": "assets/project_thumbnail_1.png",
+      "isPdf": false,
+      "category": "portafolio",
+      "date": "2026"
+    }
+  ],
+  "proyectos": [
+    {
+      "id": "default_proyectos_1",
+      "title": "Aether Control Panel",
+      "tags": [
+        "Desarrollo Web"
+      ],
+      "description": "Una consola web interactiva diseñada para la monitorización de sistemas virtuales con micro-animaciones SVG, estilo steampunk limpio y rendimiento optimizado en tiempo real.",
+      "thumbnailSrc": "assets/project_thumbnail_1.png",
+      "fileSrc": "assets/project_thumbnail_1.png",
+      "isPdf": false,
+      "category": "proyectos",
+      "date": "2026"
+    },
+    {
+      "id": "default_proyectos_2",
+      "title": "Aetherian Odyssey",
+      "tags": [
+        "Videojuegos"
+      ],
+      "description": "Plataformas de acción 2D desarrollado de forma empírica en Godot. Con mecánicas de resolución de puzzles de engranajes y física de presión de vapor en estética pixel art.",
+      "thumbnailSrc": "assets/project_thumbnail_2.png",
+      "fileSrc": "assets/project_thumbnail_2.png",
+      "isPdf": false,
+      "category": "proyectos",
+      "date": "2025"
+    },
+    {
+      "id": "default_proyectos_3",
+      "title": "SteamCore Dashboard",
+      "tags": [
+        "Desarrollo Web"
+      ],
+      "description": "Aplicación web de visualización de datos industriales con gráficos animados en tiempo real, construida con D3.js y una interfaz steampunk de alta fidelidad para monitoreo de procesos.",
+      "thumbnailSrc": "assets/art_piece_1.png",
+      "fileSrc": "assets/art_piece_1.png",
+      "isPdf": false,
+      "category": "proyectos",
+      "date": "2025"
+    },
+    {
+      "id": "default_proyectos_4",
+      "title": "Chronos Gears",
+      "tags": [
+        "Videojuegos"
+      ],
+      "description": "Prototipo de puzzle mecánico 2D donde el jugador manipula engranajes y palancas para recomponer el tiempo. Desarrollado en Godot con física personalizada y arte pixel steampunk.",
+      "thumbnailSrc": "assets/art_piece_2.png",
+      "fileSrc": "assets/art_piece_2.png",
+      "isPdf": false,
+      "category": "proyectos",
+      "date": "2024"
+    }
+  ]
 }
