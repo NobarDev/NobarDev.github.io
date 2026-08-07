@@ -92,14 +92,35 @@ async function uploadFileToGitHub(path, file) {
  * Get data/publicaciones.json
  */
 async function getPublicacionesJSON() {
+    // Load local file as fallback/seed
+    let localContent = { portafolio: [], proyectos: [] };
+    try {
+        const res = await fetch('data/publicaciones.json');
+        if (res.ok) {
+            localContent = await res.json();
+        }
+    } catch (e) {
+        console.warn("Could not load local publicaciones.json", e);
+    }
+
     try {
         const data = await githubApiRequest(DATA_JSON_PATH, 'GET');
         // Decode base64 content
         const jsonStr = decodeURIComponent(escape(atob(data.content)));
-        return { sha: data.sha, content: JSON.parse(jsonStr) };
+        const remoteContent = JSON.parse(jsonStr);
+
+        const remoteIsEmpty = (!remoteContent.portafolio || remoteContent.portafolio.length === 0) &&
+                              (!remoteContent.proyectos || remoteContent.proyectos.length === 0);
+
+        if (remoteIsEmpty) {
+            console.log("Remote JSON is empty. Seeding with local defaults.");
+            return { sha: data.sha, content: localContent };
+        }
+
+        return { sha: data.sha, content: remoteContent };
     } catch (e) {
-        console.error("Error getting publicaciones JSON", e);
-        return { sha: null, content: { portafolio: [], proyectos: [] } };
+        console.error("Error getting remote publicaciones JSON, using local copy", e);
+        return { sha: null, content: localContent };
     }
 }
 

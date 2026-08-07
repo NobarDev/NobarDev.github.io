@@ -213,4 +213,13 @@ El handler del botón "Publicar Directamente" incluye `console.log` con prefijo 
 
 ---
 
+### Actualización Arquitectónica (2026-08-06)
+- **Migración a GitHub API:** Se reemplazó el uso local de `localStorage` e `IndexedDB` por un archivo centralizado `data/publicaciones.json` gestionado a través de la API de GitHub (`githubApi.js`). Ahora el Gestor sube los archivos e imágenes directamente a la nube y actualiza el JSON remoto.
+- **Modo Edición en Gestor:** Se implementó la capacidad de modificar tarjetas publicadas (cambiar imágenes, mantener imágenes anteriores si no se sube nada nuevo, editar títulos, mover entre categorías).
+- **Sincronización Local Inteligente (Desarrollo sin conexión al repositorio en tiempo real):**
+  - **Sincronización de Datos:** El Gestor guarda una caché en `localStorage` (`local_sync_publicaciones`) después de subir a GitHub. Las páginas leen esta caché al correr en `127.0.0.1` para reflejar los cambios instantáneamente sin necesidad de hacer `git pull`.
+  - **Fallback Inyección de Imágenes (404):** Dado que las nuevas miniaturas se suben directo a GitHub, estas devuelven 404 en el entorno local. Se programó un evento `onerror` en el HTML que detecta cuando falla la carga local y extrae la imagen dinámicamente de `raw.githubusercontent.com`.
+
+---
+
 *Archivo de memoria actualizado para garantizar continuidad sin pérdida de contexto.*

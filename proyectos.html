@@ -51,109 +51,7 @@
 
         <!-- Projects grid -->
         <div class="projects-grid">
-            <!-- Project 1 -->
-            <article class="project-card" data-category="web">
-                <div class="project-thumbnail">
-                    <img src="assets/project_thumbnail_1.png" alt="Aether Console UI">
-                </div>
-                <div class="project-details">
-                    <div class="project-meta">
-                        <span class="project-badge badge-web">Desarrollo Web</span>
-                        <span
-                            style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2026</span>
-                    </div>
-                    <h2 class="project-title">Aether Control Panel</h2>
-                    <p class="project-description">Una consola web interactiva diseñada para la monitorización de
-                        sistemas virtuales con micro-animaciones SVG, estilo steampunk limpio y rendimiento optimizado
-                        en tiempo real.</p>
-                    <div class="project-links">
-                        <a href="https://github.com" target="_blank" class="project-link highlight-green">
-                            <i class="fa-brands fa-github"></i> Código
-                        </a>
-                        <a href="#" class="project-link highlight-orange">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Demo En Vivo
-                        </a>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Project 2 -->
-            <article class="project-card" data-category="game">
-                <div class="project-thumbnail">
-                    <img src="assets/project_thumbnail_2.png" alt="Steampunk Odyssey Game">
-                </div>
-                <div class="project-details">
-                    <div class="project-meta">
-                        <span class="project-badge badge-game">Videojuegos</span>
-                        <span
-                            style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2025</span>
-                    </div>
-                    <h2 class="project-title">Aetherian Odyssey</h2>
-                    <p class="project-description">Plataformas de acción 2D desarrollado de forma empírica en Godot. Con
-                        mecánicas de resolución de puzzles de engranajes y física de presión de vapor en estética pixel
-                        art.</p>
-                    <div class="project-links">
-                        <a href="https://github.com" target="_blank" class="project-link highlight-green">
-                            <i class="fa-brands fa-github"></i> Repositorio
-                        </a>
-                        <a href="#" class="project-link highlight-purple">
-                            <i class="fa-solid fa-play"></i> Jugar (Itch.io)
-                        </a>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Project 3 -->
-            <article class="project-card" data-category="web">
-                <div class="project-thumbnail">
-                    <img src="assets/art_piece_1.png" alt="Branding Visual Identity">
-                </div>
-                <div class="project-details">
-                    <div class="project-meta">
-                        <span class="project-badge badge-web">Desarrollo Web</span>
-                        <span
-                            style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2025</span>
-                    </div>
-                    <h2 class="project-title">SteamCore Dashboard</h2>
-                    <p class="project-description">Aplicación web de visualización de datos industriales con gráficos
-                        animados en tiempo real, construida con D3.js y una interfaz steampunk de alta fidelidad para
-                        monitoreo de procesos.</p>
-                    <div class="project-links">
-                        <a href="https://github.com" target="_blank" class="project-link highlight-green">
-                            <i class="fa-brands fa-github"></i> Código
-                        </a>
-                        <a href="#" class="project-link highlight-orange">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Demo En Vivo
-                        </a>
-                    </div>
-                </div>
-            </article>
-
-            <!-- Project 4 -->
-            <article class="project-card" data-category="game">
-                <div class="project-thumbnail">
-                    <img src="assets/art_piece_2.png" alt="Gear Puzzle Prototype">
-                </div>
-                <div class="project-details">
-                    <div class="project-meta">
-                        <span class="project-badge badge-game">Videojuegos</span>
-                        <span
-                            style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">2024</span>
-                    </div>
-                    <h2 class="project-title">Chronos Gears</h2>
-                    <p class="project-description">Prototipo de puzzle mecánico 2D donde el jugador manipula engranajes
-                        y palancas para recomponer el tiempo. Desarrollado en Godot con física personalizada y arte
-                        pixel steampunk.</p>
-                    <div class="project-links">
-                        <a href="https://github.com" target="_blank" class="project-link highlight-green">
-                            <i class="fa-brands fa-github"></i> Repositorio
-                        </a>
-                        <a href="#" class="project-link highlight-purple">
-                            <i class="fa-solid fa-play"></i> Jugar (Itch.io)
-                        </a>
-                    </div>
-                </div>
-            </article>
+            <!-- Cargado dinámicamente -->
         </div><!-- /.projects-grid -->
     </main>
 
@@ -174,41 +72,85 @@
             if (!grid) return;
 
             try {
-                const response = await fetch('data/publicaciones.json');
-                if (!response.ok) throw new Error('Network response was not ok');
-                const data = await response.json();
+                let data;
+                const localSync = localStorage.getItem('local_sync_publicaciones');
+                if ((window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && localSync) {
+                    data = JSON.parse(localSync);
+                } else {
+                    const response = await fetch('data/publicaciones.json');
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    data = await response.json();
+                }
                 const cards = data.proyectos || [];
 
                 cards.forEach((card) => {
                     if (!card) return;
                     const tagsArr = Array.isArray(card.tags) ? card.tags : [];
-                    const tagsHTML = tagsArr.map(t => `<span class="project-badge badge-web">${t}</span>`).join('');
                     const dataType = card.isPdf ? ' data-type="pdf"' : '';
 
                     let finalThumbSrc = card.thumbnailSrc || 'assets/art_piece_1.png';
                     let finalFileSrc = card.fileSrc || '#';
 
+                    // Determine category and badge class based on tags
+                    const isGame = tagsArr.some(t => t.toLowerCase().includes('game') || t.toLowerCase().includes('juego'));
+                    const isWeb = tagsArr.some(t => t.toLowerCase().includes('web') || t.toLowerCase().includes('software') || t.toLowerCase().includes('console') || t.toLowerCase().includes('dashboard'));
+                    let categoryAttr = '';
+                    if (isGame) categoryAttr += 'game ';
+                    if (isWeb) categoryAttr += 'web ';
+                    if (!categoryAttr) categoryAttr = 'web';
+                    categoryAttr = categoryAttr.trim();
+
+                    const badgesHTML = tagsArr.map(t => {
+                        const isG = t.toLowerCase().includes('game') || t.toLowerCase().includes('juego');
+                        const badgeClass = isG ? 'badge-game' : 'badge-web';
+                        return `<span class="project-badge ${badgeClass}">${t}</span>`;
+                    }).join('');
+
+                    const dateHTML = card.date ? `<span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">${card.date}</span>` : '';
+
                     const cardId = card.id || Date.now().toString();
+
+                    let linksHTML = '';
+                    if (isGame) {
+                        linksHTML = `
+                        <a href="https://github.com" target="_blank" class="project-link highlight-green">
+                            <i class="fa-brands fa-github"></i> Repositorio
+                        </a>
+                        <a href="${finalFileSrc}" class="project-link highlight-purple view-media-btn" id="btn-${cardId}" data-title="${card.title}"${dataType}>
+                            <i class="fa-solid fa-play"></i> Jugar
+                        </a>`;
+                    } else {
+                        linksHTML = `
+                        <a href="https://github.com" target="_blank" class="project-link highlight-green">
+                            <i class="fa-brands fa-github"></i> Código
+                        </a>
+                        <a href="${finalFileSrc}" class="project-link highlight-orange view-media-btn" id="btn-${cardId}" data-title="${card.title}"${dataType}>
+                            <i class="fa-solid fa-eye"></i> Ver
+                        </a>`;
+                    }
+
                     const articleHTML = `
-                    <article class="project-card" data-category="all" data-card-id="${cardId}" style="animation: fadeIn 0.4s ease forwards;">
+                    <article class="project-card" data-category="${categoryAttr}" data-card-id="${cardId}" style="animation: fadeIn 0.4s ease forwards;">
                         <div class="project-thumbnail">
-                            <img src="${finalThumbSrc}" alt="${card.title}" id="img-${cardId}">
+                            <img src="${finalThumbSrc}" alt="${card.title}" id="img-${cardId}" data-original-src="${finalThumbSrc}" onerror="if (!this.dataset.tried) { this.dataset.tried = '1'; this.src = 'https://raw.githubusercontent.com/NobarDev/NobarDev.github.io/main/' + this.dataset.originalSrc; }">
                         </div>
                         <div class="project-details">
                             <div class="project-meta">
-                                ${tagsHTML}
+                                ${badgesHTML}
+                                ${dateHTML}
                             </div>
                             <h2 class="project-title">${card.title}</h2>
                             <p class="project-description">${card.description}</p>
                             <div class="project-links">
-                                <a href="${finalFileSrc}" class="project-link highlight-green view-media-btn" id="btn-${cardId}" data-title="${card.title}"${dataType}>
-                                    <i class="fa-solid fa-eye"></i> Ver
-                                </a>
+                                ${linksHTML}
                             </div>
                         </div>
                     </article>`;
                     grid.insertAdjacentHTML('beforeend', articleHTML);
                 });
+
+                // Trigger main.js filter bind if cards are added asynchronously
+                window.dispatchEvent(new Event('resize'));
             } catch (error) {
                 console.error("Error cargando proyectos:", error);
             }

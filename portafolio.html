@@ -41,75 +41,11 @@
             <h1 class="subpage-title">Diseño & Arte</h1>
             <p class="subpage-subtitle">Una colección de mis mejores ilustraciones digitales, afiches conceptuales y
                 branding visual con una estética steampunk industrial.</p>
-        </header>
-
+        </div>
+        
         <!-- Behance Grid -->
         <div class="behance-grid">
-            <!-- Artwork 1 -->
-            <article class="behance-card">
-                <div class="behance-media">
-                    <img src="assets/art_piece_1.png" alt="Clockwork Flight Poster">
-                </div>
-                <div class="behance-info">
-                    <div class="behance-meta">
-                        <div class="behance-tags">
-                            <span class="behance-tag">Ilustración Vectorial</span>
-                            <span class="behance-tag">Afiche</span>
-                            <span class="behance-tag">Steampunk</span>
-                        </div>
-                        <h2 class="behance-title">Chronos Wings Poster</h2>
-                        <p class="behance-description">Un diseño de cartel minimalista que representa la fusión del
-                            tiempo y el vuelo mecánico. Realizado íntegramente con herramientas vectoriales, jugando con
-                            gradientes cálidos y luces neón acentuadas.</p>
-                    </div>
-                    <a href="assets/art_piece_1.png" class="behance-btn view-media-btn"
-                        data-title="Chronos Wings Poster">Ver</a>
-                </div>
-            </article>
-
-            <!-- Artwork 2 -->
-            <article class="behance-card">
-                <div class="behance-media">
-                    <img src="assets/art_piece_2.png" alt="Steampunk Pocketwatch Blueprint">
-                </div>
-                <div class="behance-info">
-                    <div class="behance-meta">
-                        <div class="behance-tags">
-                            <span class="behance-tag">Modelado Conceptual</span>
-                            <span class="behance-tag">Ilustración Técnica</span>
-                            <span class="behance-tag">Glow-tech</span>
-                        </div>
-                        <h2 class="behance-title">Steampunk Watch Blueprint</h2>
-                        <p class="behance-description">Explosión esquemática de un reloj de bolsillo de vapor
-                            retro-futurista, con engranajes resaltados por luz ultravioleta y trazos finos minimalistas
-                            sobre fondo oscuro.</p>
-                    </div>
-                    <a href="assets/art_piece_2.png" class="behance-btn view-media-btn"
-                        data-title="Steampunk Watch Blueprint">Ver</a>
-                </div>
-            </article>
-
-            <!-- Artwork 3 -->
-            <article class="behance-card">
-                <div class="behance-media">
-                    <img src="assets/project_thumbnail_1.png" alt="Neon Interface Concept">
-                </div>
-                <div class="behance-info">
-                    <div class="behance-meta">
-                        <div class="behance-tags">
-                            <span class="behance-tag">UI / UX</span>
-                            <span class="behance-tag">Neon Design</span>
-                            <span class="behance-tag">Branding</span>
-                        </div>
-                        <h2 class="behance-title">Neon Control UI</h2>
-                        <p class="behance-description">Concepto de interfaz de usuario oscura con acentos de neón verde
-                            y naranja. Sistema de paneles modulares diseñado para aplicaciones de monitoreo industrial
-                            con estética cyberpunk.</p>
-                    </div>
-                    <a href="assets/project_thumbnail_1.png" class="behance-btn view-media-btn"
-                        data-title="Neon Control UI">Ver</a>
-                </div>
-            </article>
+            <!-- Cargado dinámicamente -->
         </div>
     </main>
 
@@ -124,66 +60,53 @@
     <script src="js/fileStore.js"></script>
     <!-- Main JavaScript -->
     <script src="js/main.js"></script>
-    <!-- Auto-inject published cards from gestor-privado -->
+    <!-- Auto-inject published cards from JSON -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const grid = document.querySelector('.behance-grid');
             if (!grid) return;
 
-            const cards = JSON.parse(localStorage.getItem('published_cards_portafolio') || '[]');
-            cards.forEach(async (card) => {
-                if (!card) return;
-                const tagsArr = Array.isArray(card.tags) ? card.tags : [];
-                const tagsHTML = tagsArr.map(t => `<span class="behance-tag">${t}</span>`).join('');
-                const dataType = card.isPdf ? ' data-type="pdf"' : '';
-
-                // Fallbacks to standard relative path
-                let finalThumbSrc = card.thumbnailSrc || 'assets/art_piece_1.png';
-                let finalFileSrc = card.fileSrc || '#';
-
-                const cardId = card.id || Date.now().toString();
-                const articleHTML = `
-                <article class="behance-card" data-card-id="${cardId}" style="animation: fadeIn 0.4s ease forwards;">
-                    <div class="behance-media">
-                        <img src="${finalThumbSrc}" alt="${card.title}" id="img-${cardId}">
-                    </div>
-                    <div class="behance-info">
-                        <div class="behance-meta">
-                            <div class="behance-tags">${tagsHTML}</div>
-                            <h2 class="behance-title">${card.title}</h2>
-                            <p class="behance-description">${card.description}</p>
-                        </div>
-                        <a href="${finalFileSrc}" class="behance-btn view-media-btn" id="btn-${cardId}" data-title="${card.title}"${dataType}>Ver</a>
-                    </div>
-                </article>`;
-                grid.insertAdjacentHTML('beforeend', articleHTML);
-
-                // If IndexedDB references exist, load them dynamically
-                if (window.FileStore) {
-                    if (card.thumbnailDbId) {
-                        try {
-                            const res = await window.FileStore.loadFileAsURL(card.thumbnailDbId);
-                            if (res && res.url) {
-                                const imgEl = document.getElementById(`img-${cardId}`);
-                                if (imgEl) imgEl.src = res.url;
-                            }
-                        } catch (e) {
-                            console.error("Error loading thumbnail from DB:", e);
-                        }
-                    }
-                    if (card.fileDbId) {
-                        try {
-                            const res = await window.FileStore.loadFileAsURL(card.fileDbId);
-                            if (res && res.url) {
-                                const btnEl = document.getElementById(`btn-${cardId}`);
-                                if (btnEl) btnEl.setAttribute('href', res.url);
-                            }
-                        } catch (e) {
-                            console.error("Error loading file from DB:", e);
-                        }
-                    }
+            try {
+                let data;
+                const localSync = localStorage.getItem('local_sync_publicaciones');
+                if ((window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && localSync) {
+                    data = JSON.parse(localSync);
+                } else {
+                    const response = await fetch('data/publicaciones.json');
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    data = await response.json();
                 }
-            });
+                const cards = data.portafolio || [];
+
+                cards.forEach((card) => {
+                    if (!card) return;
+                    const tagsArr = Array.isArray(card.tags) ? card.tags : [];
+                    const tagsHTML = tagsArr.map(t => `<span class="behance-tag">${t}</span>`).join('');
+                    const dataType = card.isPdf ? ' data-type="pdf"' : '';
+
+                    let finalThumbSrc = card.thumbnailSrc || 'assets/art_piece_1.png';
+                    let finalFileSrc = card.fileSrc || '#';
+
+                    const cardId = card.id || Date.now().toString();
+                    const articleHTML = `
+                    <article class="behance-card" data-card-id="${cardId}" style="animation: fadeIn 0.4s ease forwards;">
+                        <div class="behance-media">
+                            <img src="${finalThumbSrc}" alt="${card.title}" id="img-${cardId}" data-original-src="${finalThumbSrc}" onerror="if (!this.dataset.tried) { this.dataset.tried = '1'; this.src = 'https://raw.githubusercontent.com/NobarDev/NobarDev.github.io/main/' + this.dataset.originalSrc; }">
+                        </div>
+                        <div class="behance-info">
+                            <div class="behance-meta">
+                                <div class="behance-tags">${tagsHTML}</div>
+                                <h2 class="behance-title">${card.title}</h2>
+                                <p class="behance-description">${card.description}</p>
+                            </div>
+                            <a href="${finalFileSrc}" class="behance-btn view-media-btn" id="btn-${cardId}" data-title="${card.title}"${dataType}>Ver</a>
+                        </div>
+                    </article>`;
+                    grid.insertAdjacentHTML('beforeend', articleHTML);
+                });
+            } catch (error) {
+                console.error("Error cargando portafolio:", error);
+            }
         });
     </script>
 </body>

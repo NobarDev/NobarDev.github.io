@@ -479,6 +479,27 @@
             color: var(--text-muted);
         }
 
+        .btn-edit-file {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            background: rgba(0, 255, 136, 0.05);
+            color: var(--accent-green);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-fast);
+        }
+
+        .btn-edit-file:hover {
+            background: var(--accent-green);
+            color: var(--bg-black);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
         .btn-delete-file {
             width: 36px;
             height: 36px;
@@ -552,7 +573,7 @@
         <div class="admin-grid">
             <!-- Columna Izquierda: Formulario y Carga -->
             <div class="admin-card">
-                <h3 style="margin-bottom: 1.25rem;"><i class="fa-solid fa-cloud-arrow-up"
+                <h3 style="margin-bottom: 1.25rem;" id="formTitle"><i class="fa-solid fa-cloud-arrow-up"
                         style="color:var(--accent-green);"></i> Cargar Nuevo Archivo</h3>
 
                 <!-- Dropzone -->
@@ -566,7 +587,7 @@
 
                 <!-- Thumbnail Upload Row -->
                 <div class="thumbnail-upload-row">
-                    <img src="assets/art_piece_1.png" alt="Miniatura" class="thumbnail-preview-small"
+                    <img src="assets/default_placeholder.png" alt="Miniatura" class="thumbnail-preview-small"
                         id="thumbnailPreviewSmall">
                     <div class="thumbnail-info">
                         <h5><i class="fa-solid fa-image" style="color:var(--accent-orange);"></i> Miniatura de Tarjeta
@@ -610,6 +631,10 @@
                     <button type="button" class="btn-publish" id="btnPublish">
                         <i class="fa-solid fa-rocket"></i> Publicar Directamente en Página
                     </button>
+                    <button type="button" class="btn-admin" id="btnCancelEdit"
+                        style="display:none; background:transparent; border-color:var(--accent-orange); color:var(--accent-orange); margin-top:0.5rem;">
+                        <i class="fa-solid fa-xmark"></i> Cancelar Edición
+                    </button>
                 </form>
             </div>
 
@@ -622,7 +647,7 @@
                 <div id="cardPreviewContainer" style="margin-bottom: 1.5rem;">
                     <article class="behance-card" style="margin: 0;">
                         <div class="behance-media" id="previewMedia">
-                            <img src="assets/art_piece_1.png" alt="Vista Previa" id="previewImg">
+                            <img src="assets/default_placeholder.png" alt="Vista Previa" id="previewImg">
                         </div>
                         <div class="behance-info">
                             <div class="behance-meta">
@@ -633,7 +658,7 @@
                                 <p class="behance-description" id="previewDescription">Tu descripción aparecerá aquí...
                                 </p>
                             </div>
-                            <a href="assets/art_piece_1.png" class="behance-btn view-media-btn" id="previewBtn"
+                            <a href="assets/default_placeholder.png" class="behance-btn view-media-btn" id="previewBtn"
                                 data-title="Título de Obra">Ver</a>
                         </div>
                     </article>
@@ -703,7 +728,7 @@
                 });
             }
 
-            let currentFileUrl = 'assets/art_piece_1.png';
+            let currentFileUrl = 'assets/default_placeholder.png';
             let thumbnailUrl = '';
             let thumbnailFileName = '';
             let isPdfFile = false;
@@ -804,7 +829,7 @@
                 if (thumbnailUrl) {
                     previewImg.src = thumbnailUrl;
                 } else if (isPdfFile) {
-                    previewImg.src = 'assets/project_thumbnail_1.png';
+                    previewImg.src = 'assets/default_placeholder.png';
                 } else {
                     previewImg.src = currentFileUrl;
                 }
@@ -853,92 +878,178 @@ ${tagsHTML}
                 alert(`¡Obra "${title}" procesada! Copia el código HTML o usa el botón "Publicar Directamente".`);
             });
 
-            // Publish Directly Button
+            // Publish / Save Directly Button
             const btnPublish = document.getElementById('btnPublish');
             btnPublish.addEventListener('click', async function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('[PUBLISH] Botón clickeado');
 
                 const title = itemTitle.value.trim();
                 const tags = itemTags.value.trim();
                 const desc = itemDesc.value.trim();
                 const category = itemCategory.value;
+                const isEditing = !!editingCardId;
 
-                console.log('[PUBLISH] Datos:', { title, tags, desc, category, hasFile: !!globalMainFile });
+                console.log('[PUBLISH] Datos:', { title, tags, desc, category, hasFile: !!globalMainFile, isEditing });
 
                 if (!title || !tags || !desc) {
                     alert('Por favor completa todos los campos de texto antes de publicar.');
                     return;
                 }
 
-                if (!globalMainFile) {
+                // Only require file for NEW cards, not edits
+                if (!isEditing && !globalMainFile) {
                     alert('Por favor selecciona o arrastra un archivo (PDF o Imagen) antes de publicar.');
                     return;
                 }
 
                 // Show loading state
                 const originalBtnHTML = btnPublish.innerHTML;
-                btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publicando...';
+                btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + (isEditing ? 'Guardando...' : 'Publicando...');
                 btnPublish.style.pointerEvents = 'none';
 
                 try {
-                    const cardId = Date.now().toString();
-                    
-                    const mainFileName = globalMainFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-                    const mainFilePath = `assets/uploads/${cardId}_${mainFileName}`;
-                    await window.GitHubAPI.uploadFileToGitHub(mainFilePath, globalMainFile);
-
-                    let thumbFilePath = mainFilePath;
-                    if (thumbnailInput && thumbnailInput.files && thumbnailInput.files.length > 0) {
-                        const thumbFileName = thumbnailInput.files[0].name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-                        thumbFilePath = `assets/uploads/thumb_${cardId}_${thumbFileName}`;
-                        await window.GitHubAPI.uploadFileToGitHub(thumbFilePath, thumbnailInput.files[0]);
-                    }
-
-                    const cardData = {
-                        id: cardId,
-                        title: title,
-                        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
-                        description: desc,
-                        thumbnailSrc: thumbFilePath,
-                        fileSrc: mainFilePath,
-                        isPdf: mainFileName.toLowerCase().endsWith('.pdf'),
-                        category: category,
-                        date: new Date().toLocaleDateString('es-ES')
-                    };
-
                     const jsonRes = await window.GitHubAPI.getPublicacionesJSON();
                     const jsonData = jsonRes.content;
-                    
-                    if (!jsonData[category]) jsonData[category] = [];
-                    jsonData[category].push(cardData);
 
-                    await window.GitHubAPI.savePublicacionesJSON(jsonData, jsonRes.sha);
+                    if (isEditing) {
+                        // === UPDATE MODE ===
+                        const catKey = editingCardCategory;
+                        const cards = jsonData[catKey] || [];
+                        const cardIndex = cards.findIndex(c => c.id === editingCardId);
 
-                    // Show Success Modal
-                    const successModalEl = document.getElementById('successModal');
-                    const successMsgEl = document.getElementById('successModalMsg');
-                    const pageName = (category === 'portafolio') ? 'portafolio.html' : 'proyectos.html';
+                        if (cardIndex === -1) {
+                            alert('No se encontró la tarjeta para actualizar.');
+                            btnPublish.innerHTML = originalBtnHTML;
+                            btnPublish.style.pointerEvents = 'auto';
+                            return;
+                        }
 
-                    if (successMsgEl) {
-                        successMsgEl.innerHTML = `La tarjeta <strong>"${title}"</strong> ha sido añadida.<br><br>Puedes verla en <a href="${pageName}" style="color:var(--accent-orange); text-decoration:none;">${pageName}</a>.`;
-                    }
-                    if (successModalEl) {
-                        successModalEl.classList.add('active');
+                        const existingCard = cards[cardIndex];
+
+                        // Upload new main file if user selected one
+                        let mainFilePath = existingCard.fileSrc;
+                        if (globalMainFile) {
+                            const mainFileName = globalMainFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+                            mainFilePath = `assets/uploads/${editingCardId}_${mainFileName}`;
+                            await window.GitHubAPI.uploadFileToGitHub(mainFilePath, globalMainFile);
+                        }
+
+                        // Upload new thumbnail if user selected one
+                        let thumbFilePath = existingCard.thumbnailSrc;
+                        if (thumbnailInput && thumbnailInput.files && thumbnailInput.files.length > 0) {
+                            const thumbFileName = thumbnailInput.files[0].name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+                            thumbFilePath = `assets/uploads/thumb_${editingCardId}_${thumbFileName}`;
+                            await window.GitHubAPI.uploadFileToGitHub(thumbFilePath, thumbnailInput.files[0]);
+                        }
+
+                        // Update card data in place
+                        cards[cardIndex] = {
+                            ...existingCard,
+                            title: title,
+                            tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+                            description: desc,
+                            thumbnailSrc: thumbFilePath,
+                            fileSrc: mainFilePath,
+                            isPdf: globalMainFile ? globalMainFile.name.toLowerCase().endsWith('.pdf') : existingCard.isPdf
+                        };
+
+                        // If category changed, move card
+                        if (category !== catKey) {
+                            jsonData[catKey] = cards.filter(c => c.id !== editingCardId);
+                            if (!jsonData[category]) jsonData[category] = [];
+                            cards[cardIndex].category = category;
+                            jsonData[category].push(cards[cardIndex]);
+                        }
+
+                        await window.GitHubAPI.savePublicacionesJSON(jsonData, jsonRes.sha);
+                        localStorage.setItem('local_sync_publicaciones', JSON.stringify(jsonData));
+
+                        // Show success
+                        const successModalEl = document.getElementById('successModal');
+                        const successMsgEl = document.getElementById('successModalMsg');
+                        const pageName = (category === 'portafolio') ? 'portafolio.html' : 'proyectos.html';
+                        if (successMsgEl) {
+                            successMsgEl.innerHTML = `La tarjeta <strong>"${title}"</strong> ha sido actualizada.<br><br>Puedes verla en <a href="${pageName}" style="color:var(--accent-orange); text-decoration:none;">${pageName}</a>.`;
+                        }
+                        if (successModalEl) successModalEl.classList.add('active');
+                        else alert(`¡"${title}" actualizado!`);
+
+                        // Reset edit mode
+                        editingCardId = null;
+                        editingCardCategory = null;
+                        formTitleEl.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent-green);"></i> Cargar Nuevo Archivo';
+                        btnCancelEdit.style.display = 'none';
+
+                        btnPublish.innerHTML = '<i class="fa-solid fa-check"></i> ¡Guardado!';
+                        btnPublish.style.background = 'var(--accent-green)';
+                        btnPublish.style.borderColor = 'var(--accent-green)';
+                        setTimeout(() => {
+                            btnPublish.innerHTML = '<i class="fa-solid fa-rocket"></i> Publicar Directamente en Página';
+                            btnPublish.style.background = '';
+                            btnPublish.style.borderColor = '';
+                            btnPublish.style.pointerEvents = 'auto';
+                        }, 3000);
+
                     } else {
-                        alert(`¡"${title}" publicado! Abre ${pageName} para verlo.`);
-                    }
+                        // === CREATE MODE (original logic) ===
+                        const cardId = Date.now().toString();
 
-                    btnPublish.innerHTML = '<i class="fa-solid fa-check"></i> ¡Publicado!';
-                    btnPublish.style.background = 'var(--accent-green)';
-                    btnPublish.style.borderColor = 'var(--accent-green)';
-                    setTimeout(() => {
-                        btnPublish.innerHTML = originalBtnHTML;
-                        btnPublish.style.background = '';
-                        btnPublish.style.borderColor = '';
-                        btnPublish.style.pointerEvents = 'auto';
-                    }, 3000);
+                        const mainFileName = globalMainFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+                        const mainFilePath = `assets/uploads/${cardId}_${mainFileName}`;
+                        await window.GitHubAPI.uploadFileToGitHub(mainFilePath, globalMainFile);
+
+                        let thumbFilePath = mainFilePath;
+                        if (thumbnailInput && thumbnailInput.files && thumbnailInput.files.length > 0) {
+                            const thumbFileName = thumbnailInput.files[0].name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+                            thumbFilePath = `assets/uploads/thumb_${cardId}_${thumbFileName}`;
+                            await window.GitHubAPI.uploadFileToGitHub(thumbFilePath, thumbnailInput.files[0]);
+                        } else if (mainFileName.toLowerCase().endsWith('.pdf')) {
+                            thumbFilePath = 'assets/default_placeholder.png';
+                        }
+
+                        const cardData = {
+                            id: cardId,
+                            title: title,
+                            tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+                            description: desc,
+                            thumbnailSrc: thumbFilePath,
+                            fileSrc: mainFilePath,
+                            isPdf: mainFileName.toLowerCase().endsWith('.pdf'),
+                            category: category,
+                            date: new Date().toLocaleDateString('es-ES')
+                        };
+
+                        if (!jsonData[category]) jsonData[category] = [];
+                        jsonData[category].push(cardData);
+
+                        await window.GitHubAPI.savePublicacionesJSON(jsonData, jsonRes.sha);
+                        localStorage.setItem('local_sync_publicaciones', JSON.stringify(jsonData));
+
+                        // Show Success Modal
+                        const successModalEl = document.getElementById('successModal');
+                        const successMsgEl = document.getElementById('successModalMsg');
+                        const pageName = (category === 'portafolio') ? 'portafolio.html' : 'proyectos.html';
+
+                        if (successMsgEl) {
+                            successMsgEl.innerHTML = `La tarjeta <strong>"${title}"</strong> ha sido añadida.<br><br>Puedes verla en <a href="${pageName}" style="color:var(--accent-orange); text-decoration:none;">${pageName}</a>.`;
+                        }
+                        if (successModalEl) {
+                            successModalEl.classList.add('active');
+                        } else {
+                            alert(`¡"${title}" publicado! Abre ${pageName} para verlo.`);
+                        }
+
+                        btnPublish.innerHTML = '<i class="fa-solid fa-check"></i> ¡Publicado!';
+                        btnPublish.style.background = 'var(--accent-green)';
+                        btnPublish.style.borderColor = 'var(--accent-green)';
+                        setTimeout(() => {
+                            btnPublish.innerHTML = originalBtnHTML;
+                            btnPublish.style.background = '';
+                            btnPublish.style.borderColor = '';
+                            btnPublish.style.pointerEvents = 'auto';
+                        }, 3000);
+                    }
                 } catch (err) {
                     console.error('[PUBLISH] Error:', err);
                     alert('Error al publicar: ' + err.message);
@@ -952,20 +1063,21 @@ ${tagsHTML}
                 try {
                     const jsonRes = await window.GitHubAPI.getPublicacionesJSON();
                     const jsonData = jsonRes.content;
-                    
+
                     const cards = jsonData[category] || [];
                     const cardToDelete = cards.find(c => c.id === cardId);
-                    
+
                     if (cardToDelete) {
-                        if (cardToDelete.fileSrc) {
+                        if (cardToDelete.fileSrc && cardToDelete.fileSrc.includes('assets/uploads/')) {
                             await window.GitHubAPI.deleteFileFromGitHub(cardToDelete.fileSrc);
                         }
-                        if (cardToDelete.thumbnailSrc && cardToDelete.thumbnailSrc !== cardToDelete.fileSrc) {
+                        if (cardToDelete.thumbnailSrc && cardToDelete.thumbnailSrc !== cardToDelete.fileSrc && cardToDelete.thumbnailSrc.includes('assets/uploads/')) {
                             await window.GitHubAPI.deleteFileFromGitHub(cardToDelete.thumbnailSrc);
                         }
-                        
+
                         jsonData[category] = cards.filter(c => c.id !== cardId);
                         await window.GitHubAPI.savePublicacionesJSON(jsonData, jsonRes.sha);
+                        localStorage.setItem('local_sync_publicaciones', JSON.stringify(jsonData));
                         alert("Archivo eliminado correctamente.");
                     }
                 } catch (e) {
@@ -1051,9 +1163,14 @@ ${tagsHTML}
                                 <h4>${card.title}</h4>
                                 <p>${card.fileSrc.replace('assets/', '')} &bull; ${card.date}</p>
                             </div>
-                            <button type="button" class="btn-delete-file" onclick="deleteFileFromManager('${card.id}', '${category}')" title="Eliminar Archivo">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
+                            <div style="display:flex; gap:0.5rem; align-items:center; flex-shrink:0;">
+                                <button type="button" class="btn-edit-file" onclick="editFileFromManager('${card.id}', '${category}')" title="Modificar Tarjeta">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button type="button" class="btn-delete-file" onclick="deleteFileFromManager('${card.id}', '${category}')" title="Eliminar Archivo">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
                         </div>
                     `).join('');
                 } catch (e) {
@@ -1072,6 +1189,98 @@ ${tagsHTML}
             }
             window.deleteFileFromManager = deleteFileFromManager;
 
+            // ============================================================
+            // EDIT MODE: Load card data into form for modification
+            // ============================================================
+            let editingCardId = null;
+            let editingCardCategory = null;
+            const btnCancelEdit = document.getElementById('btnCancelEdit');
+            const formTitleEl = document.getElementById('formTitle');
+
+            async function editFileFromManager(cardId, category) {
+                try {
+                    const jsonRes = await window.GitHubAPI.getPublicacionesJSON();
+                    const cards = jsonRes.content[category] || [];
+                    const card = cards.find(c => c.id === cardId);
+                    if (!card) {
+                        alert('No se encontró la tarjeta para editar.');
+                        return;
+                    }
+
+                    // Close the manage modal
+                    manageModal.classList.remove('active');
+
+                    // Store editing state
+                    editingCardId = cardId;
+                    editingCardCategory = category;
+
+                    // Populate form fields
+                    itemTitle.value = card.title || '';
+                    itemTags.value = (Array.isArray(card.tags) ? card.tags : []).join(', ');
+                    itemDesc.value = card.description || '';
+                    itemCategory.value = category;
+
+                    // Update destination card selection
+                    destCards.forEach(c => c.classList.remove('active'));
+                    destCards.forEach(c => {
+                        if (c.getAttribute('data-value') === category) c.classList.add('active');
+                    });
+
+                    // Show thumbnail if available
+                    if (card.thumbnailSrc) {
+                        thumbnailUrl = card.thumbnailSrc;
+                        thumbnailFileName = card.thumbnailSrc.split('/').pop();
+                        previewImg.src = card.thumbnailSrc;
+                        thumbnailPreviewSmall.src = card.thumbnailSrc;
+                        if(thumbnailFileNameEl) thumbnailFileNameEl.textContent = thumbnailFileName;
+                    } else {
+                        thumbnailUrl = '';
+                        thumbnailFileName = '';
+                    }
+                    currentFileUrl = card.fileSrc || 'assets/default_placeholder.png';
+                    isPdfFile = card.isPdf || false;
+
+                    // Switch UI to edit mode
+                    formTitleEl.innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:var(--accent-orange);"></i> Editando Tarjeta';
+                    btnPublish.innerHTML = '<i class="fa-solid fa-save"></i> Guardar Cambios';
+                    btnPublish.style.background = 'var(--accent-orange)';
+                    btnPublish.style.borderColor = 'var(--accent-orange)';
+                    btnCancelEdit.style.display = 'flex';
+
+                    // Mark file as optional for edits (user may not change it)
+                    globalMainFile = null;
+
+                    updatePreview();
+
+                    // Scroll to form
+                    formTitleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } catch (e) {
+                    console.error('Error loading card for edit:', e);
+                    alert('Error al cargar la tarjeta: ' + e.message);
+                }
+            }
+            window.editFileFromManager = editFileFromManager;
+
+            // Cancel edit mode
+            btnCancelEdit.addEventListener('click', () => {
+                editingCardId = null;
+                editingCardCategory = null;
+                formTitleEl.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent-green);"></i> Cargar Nuevo Archivo';
+                btnPublish.innerHTML = '<i class="fa-solid fa-rocket"></i> Publicar Directamente en Página';
+                btnPublish.style.background = '';
+                btnPublish.style.borderColor = '';
+                btnCancelEdit.style.display = 'none';
+                uploadForm.reset();
+                currentFileUrl = 'assets/default_placeholder.png';
+                thumbnailUrl = '';
+                thumbnailFileName = '';
+                thumbnailPreviewSmall.src = 'assets/default_placeholder.png';
+                thumbnailFileNameEl.textContent = 'Imagen que aparecerá en el portafolio';
+                globalMainFile = null;
+                isPdfFile = false;
+                updatePreview();
+            });
+
             // Success Modal Close Event
             const btnSuccessClose = document.getElementById('btnSuccessClose');
             const successModal = document.getElementById('successModal');
@@ -1080,7 +1289,13 @@ ${tagsHTML}
                     successModal.classList.remove('active');
                     // Reset the form for the next upload
                     uploadForm.reset();
-                    currentFileUrl = 'assets/art_piece_1.png';
+                    currentFileUrl = 'assets/default_placeholder.png';
+                    thumbnailUrl = '';
+                    thumbnailFileName = '';
+                    thumbnailPreviewSmall.src = 'assets/default_placeholder.png';
+                    if (thumbnailFileNameEl) thumbnailFileNameEl.textContent = 'Imagen que aparecerá en el portafolio';
+                    globalMainFile = null;
+                    isPdfFile = false;
                     updatePreview();
                 });
             }
