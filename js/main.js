@@ -333,7 +333,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
 
                     await page.render(renderContext).promise;
-                    canvasWrapper.appendChild(canvas);
+
+                    const pageContainer = document.createElement('div');
+                    pageContainer.className = 'pdf-page-container';
+                    pageContainer.appendChild(canvas);
+                    
+                    canvasWrapper.appendChild(pageContainer);
                 }
 
                 setupIntersectionObserver();
@@ -356,7 +361,10 @@ document.addEventListener('DOMContentLoaded', () => {
             img.alt = title;
             img.onload = () => {
                 canvasWrapper.innerHTML = '';
-                canvasWrapper.appendChild(img);
+                const pageContainer = document.createElement('div');
+                pageContainer.className = 'pdf-page-container';
+                pageContainer.appendChild(img);
+                canvasWrapper.appendChild(pageContainer);
             };
             img.onerror = () => {
                 canvasWrapper.innerHTML = `<div style="color:var(--accent-orange); font-size:1.1rem;"><i class="fa-solid fa-triangle-exclamation"></i> Error al cargar la imagen.</div>`;
