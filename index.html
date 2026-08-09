@@ -152,7 +152,6 @@
     <!-- Main JavaScript -->
     <script src="js/main.js"></script>
 
-    <!-- Auto-inject Obras Destacadas from JSON -->
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const galleryShowcase = document.querySelector('.gallery-showcase');
@@ -161,7 +160,9 @@
             try {
                 let data;
                 const localSync = localStorage.getItem('local_sync_publicaciones');
-                if ((window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && localSync) {
+                const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:';
+                
+                if (isLocal && localSync) {
                     data = JSON.parse(localSync);
                 } else {
                     const response = await fetch('data/publicaciones.json');
@@ -172,13 +173,23 @@
                 const portafolioCards = data.portafolio || [];
                 const proyectosCards = data.proyectos || [];
 
-                // Intercalar 2 de portafolio y 2 de proyectos
+                // Obtener los 2 últimos de cada categoría (los más recientes)
+                const pLen = portafolioCards.length;
+                const prLen = proyectosCards.length;
+                
+                const p1 = pLen > 0 ? portafolioCards[pLen - 1] : null; // El último
+                const p2 = pLen > 1 ? portafolioCards[pLen - 2] : null; // El penúltimo
+                
+                const pr1 = prLen > 0 ? proyectosCards[prLen - 1] : null;
+                const pr2 = prLen > 1 ? proyectosCards[prLen - 2] : null;
+
+                // Intercalar: Portafolio, Proyecto, Portafolio, Proyecto
                 const itemsToDisplay = [];
                 
-                if (portafolioCards[0]) itemsToDisplay.push({...portafolioCards[0], _type: 'portafolio'});
-                if (proyectosCards[0]) itemsToDisplay.push({...proyectosCards[0], _type: 'proyecto'});
-                if (portafolioCards[1]) itemsToDisplay.push({...portafolioCards[1], _type: 'portafolio'});
-                if (proyectosCards[1]) itemsToDisplay.push({...proyectosCards[1], _type: 'proyecto'});
+                if (p1) itemsToDisplay.push({...p1, _type: 'portafolio'});
+                if (pr1) itemsToDisplay.push({...pr1, _type: 'proyecto'});
+                if (p2) itemsToDisplay.push({...p2, _type: 'portafolio'});
+                if (pr2) itemsToDisplay.push({...pr2, _type: 'proyecto'});
 
                 // Limpiamos los elementos estáticos (si los hubiera)
                 galleryShowcase.innerHTML = '';
@@ -192,23 +203,23 @@
                     
                     const finalThumbSrc = card.thumbnailSrc || 'assets/art_piece_1.png';
 
-                    const articleHTML = \`
+                    const articleHTML = `
                         <article class="gallery-item" style="animation: fadeIn 0.4s ease forwards;">
                             <div class="gallery-img-container">
-                                <img src="\${finalThumbSrc}" alt="\${card.title}" onerror="if (!this.dataset.tried) { this.dataset.tried = '1'; this.src = 'https://raw.githubusercontent.com/NobarDev/NobarDev.github.io/main/' + '\${finalThumbSrc}'; }">
+                                <img src="${finalThumbSrc}" alt="${card.title}" onerror="if (!this.dataset.tried) { this.dataset.tried = '1'; this.src = 'https://raw.githubusercontent.com/NobarDev/NobarDev.github.io/main/' + '${finalThumbSrc}'; }">
                             </div>
                             <div class="gallery-info">
-                                <span class="gallery-category">\${categoryLabel}</span>
-                                <h3 class="gallery-title">\${card.title}</h3>
+                                <span class="gallery-category">${categoryLabel}</span>
+                                <h3 class="gallery-title">${card.title}</h3>
                                 <p class="gallery-desc" style="color: var(--text-muted); font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                                    \${card.description}
+                                    ${card.description}
                                 </p>
-                                <a href="\${linkHref}" class="gallery-link">
-                                    \${linkText} <i class="fa-solid fa-arrow-right"></i>
+                                <a href="${linkHref}" class="gallery-link">
+                                    ${linkText} <i class="fa-solid fa-arrow-right"></i>
                                 </a>
                             </div>
                         </article>
-                    \`;
+                    `;
                     galleryShowcase.insertAdjacentHTML('beforeend', articleHTML);
                 });
             } catch (error) {
