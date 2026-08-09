@@ -64,74 +64,7 @@
             <div class="section-wrapper">
                 <h2>Obras <span class="highlight-green">Destacadas</span></h2>
                 <div class="gallery-showcase">
-                    <!-- Galería Item 1 -->
-                    <article class="gallery-item">
-                        <div class="gallery-img-container">
-                            <img src="assets/art_piece_1.png" alt="Steampunk Poster Art">
-                        </div>
-                        <div class="gallery-info">
-                            <span class="gallery-category">Ilustración</span>
-                            <h3 class="gallery-title">Clockwork Wings</h3>
-                            <p class="gallery-desc" style="color: var(--text-muted); font-size: 0.9rem;">
-                                Concepto de diseño steampunk de alas mecánicas acopladas a la estética de iluminación
-                                moderna.
-                            </p>
-                            <a href="portafolio.html" class="gallery-link">
-                                Ver Portafolio <i class="fa-solid fa-arrow-right"></i>
-                            </a>
-                        </div>
-                    </article>
-                    <!-- Galería Item 2 -->
-                    <article class="gallery-item">
-                        <div class="gallery-img-container">
-                            <img src="assets/project_thumbnail_1.png" alt="Dashboard App UI">
-                        </div>
-                        <div class="gallery-info">
-                            <span class="gallery-category">Desarrollo Web</span>
-                            <h3 class="gallery-title">Aether Console</h3>
-                            <p class="gallery-desc" style="color: var(--text-muted); font-size: 0.9rem;">
-                                Panel de control de interfaz de usuario de inspiración steampunk con estética neón
-                                minimalista.
-                            </p>
-                            <a href="proyectos.html" class="gallery-link">
-                                Ver Proyectos <i class="fa-solid fa-arrow-right"></i>
-                            </a>
-                        </div>
-                    </article>
-                    <!-- Galería Item 3 -->
-                    <article class="gallery-item">
-                        <div class="gallery-img-container">
-                            <img src="assets/project_thumbnail_2.png" alt="Steampunk Odyssey Game">
-                        </div>
-                        <div class="gallery-info">
-                            <span class="gallery-category">Videojuegos</span>
-                            <h3 class="gallery-title">Aetherian Odyssey</h3>
-                            <p class="gallery-desc" style="color: var(--text-muted); font-size: 0.9rem;">
-                                Plataformas de acción 2D desarrollado de forma empírica en Godot con puzzles de
-                                engranajes.
-                            </p>
-                            <a href="proyectos.html" class="gallery-link">
-                                Ver Proyectos <i class="fa-solid fa-arrow-right"></i>
-                            </a>
-                        </div>
-                    </article>
-                    <!-- Galería Item 4 -->
-                    <article class="gallery-item">
-                        <div class="gallery-img-container">
-                            <img src="assets/art_piece_2.png" alt="Mechanical Watch Blueprint">
-                        </div>
-                        <div class="gallery-info">
-                            <span class="gallery-category">Ilustración Técnica</span>
-                            <h3 class="gallery-title">Chronos Watch</h3>
-                            <p class="gallery-desc" style="color: var(--text-muted); font-size: 0.9rem;">
-                                Explosión esquemática de un reloj de bolsillo de vapor retro-futurista con luces de
-                                neón.
-                            </p>
-                            <a href="portafolio.html" class="gallery-link">
-                                Ver Portafolio <i class="fa-solid fa-arrow-right"></i>
-                            </a>
-                        </div>
-                    </article>
+                    <!-- Se cargan dinámicamente desde publicaciones.json -->
                 </div>
             </div>
         </section>
@@ -218,6 +151,71 @@
 
     <!-- Main JavaScript -->
     <script src="js/main.js"></script>
+
+    <!-- Auto-inject Obras Destacadas from JSON -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const galleryShowcase = document.querySelector('.gallery-showcase');
+            if (!galleryShowcase) return;
+
+            try {
+                let data;
+                const localSync = localStorage.getItem('local_sync_publicaciones');
+                if ((window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && localSync) {
+                    data = JSON.parse(localSync);
+                } else {
+                    const response = await fetch('data/publicaciones.json');
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    data = await response.json();
+                }
+                
+                const portafolioCards = data.portafolio || [];
+                const proyectosCards = data.proyectos || [];
+
+                // Intercalar 2 de portafolio y 2 de proyectos
+                const itemsToDisplay = [];
+                
+                if (portafolioCards[0]) itemsToDisplay.push({...portafolioCards[0], _type: 'portafolio'});
+                if (proyectosCards[0]) itemsToDisplay.push({...proyectosCards[0], _type: 'proyecto'});
+                if (portafolioCards[1]) itemsToDisplay.push({...portafolioCards[1], _type: 'portafolio'});
+                if (proyectosCards[1]) itemsToDisplay.push({...proyectosCards[1], _type: 'proyecto'});
+
+                // Limpiamos los elementos estáticos (si los hubiera)
+                galleryShowcase.innerHTML = '';
+
+                itemsToDisplay.forEach(card => {
+                    const isPortafolio = card._type === 'portafolio';
+                    // Extraer una categoría principal de los tags, o usar un default
+                    const categoryLabel = card.tags && card.tags.length > 0 ? card.tags[0] : (isPortafolio ? 'Ilustración' : 'Desarrollo');
+                    const linkHref = isPortafolio ? 'portafolio.html' : 'proyectos.html';
+                    const linkText = isPortafolio ? 'Ver Portafolio' : 'Ver Proyectos';
+                    
+                    const finalThumbSrc = card.thumbnailSrc || 'assets/art_piece_1.png';
+
+                    const articleHTML = \`
+                        <article class="gallery-item" style="animation: fadeIn 0.4s ease forwards;">
+                            <div class="gallery-img-container">
+                                <img src="\${finalThumbSrc}" alt="\${card.title}" onerror="if (!this.dataset.tried) { this.dataset.tried = '1'; this.src = 'https://raw.githubusercontent.com/NobarDev/NobarDev.github.io/main/' + '\${finalThumbSrc}'; }">
+                            </div>
+                            <div class="gallery-info">
+                                <span class="gallery-category">\${categoryLabel}</span>
+                                <h3 class="gallery-title">\${card.title}</h3>
+                                <p class="gallery-desc" style="color: var(--text-muted); font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                    \${card.description}
+                                </p>
+                                <a href="\${linkHref}" class="gallery-link">
+                                    \${linkText} <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </article>
+                    \`;
+                    galleryShowcase.insertAdjacentHTML('beforeend', articleHTML);
+                });
+            } catch (error) {
+                console.error("Error cargando obras destacadas:", error);
+            }
+        });
+    </script>
 </body>
 
 </html>
