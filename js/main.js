@@ -319,7 +319,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Render pages vertically
                 for (let i = 1; i <= totalPages; i++) {
                     const page = await currentPdfDoc.getPage(i);
-                    const viewport = page.getViewport({ scale: 1.5 });
+                    const unscaledViewport = page.getViewport({ scale: 1.0 });
+                    const container = document.getElementById('pdfScrollArea');
+                    // Restamos un poco de margen para que la página respire dentro del contenedor
+                    const containerWidth = container.clientWidth - 48;
+                    const containerHeight = container.clientHeight - 48;
+                    
+                    const scaleX = containerWidth / unscaledViewport.width;
+                    const scaleY = containerHeight / unscaledViewport.height;
+                    const fitScale = Math.min(scaleX, scaleY);
+
+                    const viewport = page.getViewport({ scale: fitScale });
 
                     const canvas = document.createElement('canvas');
                     canvas.dataset.pageNumber = i;
